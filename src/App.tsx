@@ -15,7 +15,6 @@ import RitualOfTheDay from "@/pages/RitualOfTheDay";
 import Meditation from "@/pages/Meditation";
 import Planner from "@/pages/Planner";
 import EmotionDiary from "@/pages/EmotionDiary";
-import CeliaMessage from "@/pages/CeliaMessage";
 import Settings from "@/pages/Settings";
 import Navigation from "@/components/Navigation";
 
@@ -66,7 +65,6 @@ const AppContent = () => {
         <Route path="/meditation" element={<Meditation />} />
         <Route path="/planner" element={<Planner />} />
         <Route path="/diary" element={<EmotionDiary />} />
-        <Route path="/celia" element={<CeliaMessage />} />
         <Route path="/forest" element={<MyForest />} />
         <Route path="/emergency" element={<EmergencyMeditation />} />
         <Route path="/settings" element={<Settings />} />

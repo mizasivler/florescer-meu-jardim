@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Headphones, Calendar, MessageSquare, Settings, User, Zap, BookOpen, Activity } from 'lucide-react';
+import { Heart, Headphones, Calendar, MessageSquare, Settings, Activity, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserData } from '@/hooks/useUserData';
 import { useToast } from '@/hooks/use-toast';
@@ -80,14 +81,6 @@ const Index = () => {
   ];
 
   const supportActions = [
-    { 
-      icon: User, 
-      title: 'Conversar com Célia', 
-      description: 'Sua mentora sempre disponível',
-      color: 'bg-indigo-500', 
-      path: '/celia',
-      illustration: '💬'
-    },
     { 
       icon: Activity, 
       title: 'Minha Floresta', 
@@ -247,7 +240,7 @@ const Index = () => {
         {/* Support Section */}
         <div>
           <h2 className="font-lora font-bold text-2xl mb-4 text-florescer-dark flex items-center gap-2">
-            <span>🤝</span> Suporte & Progresso
+            <span>🤝</span> Progresso
           </h2>
           <div className="grid grid-cols-1 gap-4">
             {supportActions.map((action, index) => (
@@ -292,18 +285,6 @@ const Index = () => {
             </Button>
           </div>
         </Card>
-      </div>
-
-      {/* Floating Action - Célia Message */}
-      <div className="fixed bottom-24 right-6">
-        <Button 
-          size="lg" 
-          className="btn-secondary rounded-full shadow-xl animate-gentle-pulse hover:scale-110 transition-all duration-300"
-          onClick={() => navigate('/celia')}
-        >
-          <MessageSquare className="h-5 w-5 mr-2" />
-          Célia
-        </Button>
       </div>
     </div>
   );
