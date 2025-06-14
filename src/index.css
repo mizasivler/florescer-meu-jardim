@@ -90,6 +90,19 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-lora;
+    line-height: 1.2;
+  }
+
+  h1 {
+    @apply text-3xl font-bold;
+  }
+
+  h2 {
+    @apply text-2xl font-bold;
+  }
+
+  h3 {
+    @apply text-xl font-semibold;
   }
 
   .gradient-florescer {
@@ -107,22 +120,79 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-florescer-copper hover:bg-florescer-light-copper text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 shadow-soft hover:shadow-lg;
+    @apply bg-florescer-copper hover:bg-florescer-light-copper text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-soft hover:shadow-lg hover:scale-105;
   }
 
   .btn-secondary {
-    @apply bg-florescer-olive hover:bg-florescer-light-olive text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 shadow-soft hover:shadow-lg;
+    @apply bg-florescer-olive hover:bg-florescer-light-olive text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-soft hover:shadow-lg hover:scale-105;
   }
 
   .card-florescer {
-    @apply bg-white rounded-2xl p-6 shadow-soft border border-florescer-cream;
+    @apply bg-white rounded-2xl p-6 shadow-soft border border-florescer-cream/50 transition-all duration-300;
   }
 
   .mood-emoji {
-    @apply text-4xl p-4 rounded-full bg-white shadow-soft hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-110;
+    @apply text-4xl p-4 rounded-full bg-white shadow-soft hover:shadow-lg transition-all duration-300 cursor-pointer flex items-center justify-center min-w-[70px] min-h-[70px];
   }
 
   .progress-flower {
-    @apply w-8 h-8 rounded-full flex items-center justify-center text-lg;
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300;
   }
+
+  /* Typography improvements */
+  .text-hierarchy-1 {
+    @apply text-3xl font-bold font-lora leading-tight;
+  }
+
+  .text-hierarchy-2 {
+    @apply text-2xl font-bold font-lora leading-snug;
+  }
+
+  .text-hierarchy-3 {
+    @apply text-xl font-semibold font-lora leading-snug;
+  }
+
+  .text-body-large {
+    @apply text-lg font-medium leading-relaxed;
+  }
+
+  .text-body {
+    @apply text-base leading-relaxed;
+  }
+
+  .text-body-small {
+    @apply text-sm leading-relaxed;
+  }
+
+  .text-caption {
+    @apply text-xs font-medium uppercase tracking-wide;
+  }
+
+  /* Enhanced animations */
+  .hover-lift {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-2xl hover:shadow-florescer-copper/20;
+  }
+}
+
+/* Enhanced animations */
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
+}
+
+.animate-gentle-bounce {
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 3s ease-in-out infinite;
 }
