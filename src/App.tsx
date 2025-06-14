@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,65 +9,60 @@ import OnboardingFlow from "@/components/OnboardingFlow";
 import Index from "./pages/Index";
 import MyForest from "@/components/MyForest";
 import EmergencyMeditation from "@/components/EmergencyMeditation";
+import RitualOfTheDay from "@/pages/RitualOfTheDay";
+import Meditation from "@/pages/Meditation";
+import Planner from "@/pages/Planner";
+import EmotionDiary from "@/pages/EmotionDiary";
+import CeliaMessage from "@/pages/CeliaMessage";
+import Settings from "@/pages/Settings";
+import Navigation from "@/components/Navigation";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('onboarding-completed');
+  });
 
   const handleOnboardingComplete = () => {
+    localStorage.setItem('onboarding-completed', 'true');
     setShowOnboarding(false);
-    setCurrentView('dashboard');
   };
 
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'dashboard':
-        return <Index />;
-      case 'forest':
-        return <MyForest />;
-      case 'emergency':
-        return <EmergencyMeditation />;
-      default:
-        return <Index />;
-    }
-  };
+  if (showOnboarding) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <OnboardingFlow onComplete={handleOnboardingComplete} />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {showOnboarding ? (
-          <OnboardingFlow onComplete={handleOnboardingComplete} />
-        ) : (
-          <>
-            {renderCurrentView()}
-            
-            {/* Navigation for demo purposes */}
-            <div className="fixed bottom-4 left-4 flex gap-2 z-50">
-              <button 
-                onClick={() => setCurrentView('dashboard')}
-                className="bg-florescer-copper text-white px-3 py-1 rounded text-sm"
-              >
-                Dashboard
-              </button>
-              <button 
-                onClick={() => setCurrentView('forest')}
-                className="bg-florescer-olive text-white px-3 py-1 rounded text-sm"
-              >
-                Floresta
-              </button>
-              <button 
-                onClick={() => setCurrentView('emergency')}
-                className="bg-red-500 text-white px-3 py-1 rounded text-sm"
-              >
-                SOS
-              </button>
-            </div>
-          </>
-        )}
+        <Router>
+          <div className="min-h-screen">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/ritual" element={<RitualOfTheDay />} />
+              <Route path="/meditation" element={<Meditation />} />
+              <Route path="/planner" element={<Planner />} />
+              <Route path="/diary" element={<EmotionDiary />} />
+              <Route path="/celia" element={<CeliaMessage />} />
+              <Route path="/forest" element={<MyForest />} />
+              <Route path="/emergency" element={<EmergencyMeditation />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Navigation />
+          </div>
+        </Router>
       </TooltipProvider>
     </QueryClientProvider>
   );

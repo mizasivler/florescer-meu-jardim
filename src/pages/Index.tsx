@@ -1,11 +1,13 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Heart, Headphones, Calendar, MessageSquare, Settings, User } from 'lucide-react';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentMood, setCurrentMood] = useState<string>('');
   const [userName] = useState('Luciana');
   const [dayProgress] = useState(5);
@@ -50,7 +52,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-florescer">
+    <div className="min-h-screen gradient-florescer pb-20">
       {/* Header */}
       <div className="p-6 pb-4">
         <div className="flex justify-between items-center mb-4">
@@ -60,7 +62,12 @@ const Index = () => {
             </h1>
             <p className="text-florescer-dark/70 mt-1">Como você está se sentindo hoje?</p>
           </div>
-          <Button variant="ghost" size="sm" className="text-florescer-copper">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-florescer-copper"
+            onClick={() => navigate('/settings')}
+          >
             <Settings className="h-5 w-5" />
           </Button>
         </div>
@@ -109,7 +116,11 @@ const Index = () => {
         <h2 className="font-lora font-semibold text-xl mb-4">Sua jornada hoje</h2>
         <div className="grid grid-cols-2 gap-4 mb-6">
           {quickActions.map((action, index) => (
-            <Card key={index} className="card-florescer hover:shadow-lg transition-all duration-300 cursor-pointer group">
+            <Card 
+              key={index} 
+              className="card-florescer hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              onClick={() => navigate(action.path)}
+            >
               <div className="text-center">
                 <div className={`${action.color} w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300`}>
                   <action.icon className="h-6 w-6 text-white" />
@@ -121,7 +132,10 @@ const Index = () => {
         </div>
 
         {/* Emergency Button */}
-        <Card className="card-florescer bg-gradient-to-r from-red-50 to-pink-50 border-red-100">
+        <Card 
+          className="card-florescer bg-gradient-to-r from-red-50 to-pink-50 border-red-100 cursor-pointer"
+          onClick={() => navigate('/emergency')}
+        >
           <div className="text-center">
             <h3 className="font-lora font-semibold text-lg mb-2 text-red-700">
               Preciso disso agora
@@ -153,10 +167,11 @@ const Index = () => {
       </div>
 
       {/* Floating Action - Célia Message */}
-      <div className="fixed bottom-6 right-6">
+      <div className="fixed bottom-20 right-6">
         <Button 
           size="lg" 
           className="btn-secondary rounded-full shadow-lg animate-gentle-pulse"
+          onClick={() => navigate('/celia')}
         >
           <MessageSquare className="h-5 w-5 mr-2" />
           Célia
