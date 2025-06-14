@@ -5,6 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Heart, User, Mail } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserData } from '@/hooks/useUserData';
+import { useToast } from '@/hooks/use-toast';
 
 interface OnboardingFlowProps {
   onComplete: () => void;
@@ -18,6 +21,10 @@ const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
     initialMood: '',
     menopauseType: ''
   });
+
+  const { user, signUp, signIn } = useAuth();
+  const { updateProfile } = useUserData();
+  const { toast } = useToast();
 
   const moodOptions = [
     { emoji: '😴', label: 'Exausta e sem energia', value: 'exhausted', type: 'A' },
@@ -34,7 +41,7 @@ const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
       message: "Sua jornada será focada em restaurar sua vitalidade gradualmente."
     },
     B: {
-      title: "Menopausa da Ansiedade",
+      title: "Menopausa da Ansiedade", 
       description: "As mudanças hormonais estão afetando seu sistema nervoso, gerando preocupações.",
       message: "Vamos trabalhar técnicas de respiração e tranquilização."
     },
@@ -62,6 +69,52 @@ const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
       menopauseType: mood.type
     }));
     setStep(3);
+  };
+
+  const handleCreateAccount = async () => {
+    try {
+      const { error } = await signUp(userData.email, '', userData.name);
+      
+      if (error) {
+        toast({
+          title: "Erro no cadastro",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Verifique seu e-mail para confirmar"
+      });
+      
+      setStep(2);
+    } catch (error) {
+      toast({
+        title: "Erro inesperado",
+        description: "Tente novamente em alguns instantes",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCompleteOnboarding = async () => {
+    try {
+      if (user) {
+        await updateProfile({
+          initial_mood: userData.initialMood,
+          menopause_type: userData.menopauseType,
+          onboarding_completed: true
+        });
+      }
+      
+      localStorage.setItem('onboarding-completed', 'true');
+      onComplete();
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      onComplete(); // Complete anyway to not block the user
+    }
   };
 
   const renderStep = () => {
@@ -197,7 +250,7 @@ const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
               </div>
 
               <Button 
-                onClick={onComplete} 
+                onClick={handleCompleteOnboarding} 
                 className="btn-primary w-full h-12 text-lg"
               >
                 Começar minha jornada

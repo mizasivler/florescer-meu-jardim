@@ -9,7 +9,223 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      daily_moods: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          mood: Database["public"]["Enums"]["mood_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          mood: Database["public"]["Enums"]["mood_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          mood?: Database["public"]["Enums"]["mood_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_moods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_entries: {
+        Row: {
+          content: string
+          created_at: string | null
+          date: string
+          id: string
+          mood: Database["public"]["Enums"]["mood_type"] | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          date?: string
+          id?: string
+          mood?: Database["public"]["Enums"]["mood_type"] | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          date?: string
+          id?: string
+          mood?: Database["public"]["Enums"]["mood_type"] | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meditation_sessions: {
+        Row: {
+          completed_at: string | null
+          duration_minutes: number
+          id: string
+          meditation_id: number
+          meditation_title: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_minutes: number
+          id?: string
+          meditation_id: number
+          meditation_title: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          duration_minutes?: number
+          id?: string
+          meditation_id?: number
+          meditation_title?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meditation_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          initial_mood: string | null
+          menopause_type: string | null
+          name: string
+          onboarding_completed: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          initial_mood?: string | null
+          menopause_type?: string | null
+          name: string
+          onboarding_completed?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          initial_mood?: string | null
+          menopause_type?: string | null
+          name?: string
+          onboarding_completed?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ritual_completions: {
+        Row: {
+          completed_at: string | null
+          id: string
+          notes: string | null
+          ritual_type: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          ritual_type: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          ritual_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ritual_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          completed_meditations: number | null
+          completed_rituals: number | null
+          current_day: number
+          flowers_earned: number | null
+          id: string
+          total_days: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_meditations?: number | null
+          completed_rituals?: number | null
+          current_day?: number
+          flowers_earned?: number | null
+          id?: string
+          total_days?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_meditations?: number | null
+          completed_rituals?: number | null
+          current_day?: number
+          flowers_earned?: number | null
+          id?: string
+          total_days?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +234,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      mood_type: "tired" | "anxious" | "sensitive" | "irritated" | "hopeful"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +349,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      mood_type: ["tired", "anxious", "sensitive", "irritated", "hopeful"],
+    },
   },
 } as const

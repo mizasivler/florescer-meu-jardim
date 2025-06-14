@@ -1,17 +1,19 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Heart, Headphones, Calendar, MessageSquare, Settings, User, Zap, BookOpen, Activity } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserData } from '@/hooks/useUserData';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { profile, progress, saveDailyMood, loading } = useUserData();
+  const { toast } = useToast();
   const [currentMood, setCurrentMood] = useState<string>('');
-  const [userName] = useState('Luciana');
-  const [dayProgress] = useState(5);
-  const [totalDays] = useState(21);
 
   const moodOptions = [
     { emoji: '😴', label: 'Cansada', value: 'tired' },
@@ -20,6 +22,24 @@ const Index = () => {
     { emoji: '😤', label: 'Irritada', value: 'irritated' },
     { emoji: '🌟', label: 'Esperançosa', value: 'hopeful' }
   ];
+
+  const handleMoodSelect = async (mood: string) => {
+    setCurrentMood(mood);
+    const { error } = await saveDailyMood(mood);
+    
+    if (error) {
+      toast({
+        title: "Erro ao salvar humor",
+        description: "Tente novamente em alguns instantes",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Humor registrado!",
+        description: "Obrigada por compartilhar como se sente hoje"
+      });
+    }
+  };
 
   const ritualActions = [
     { 
@@ -86,11 +106,14 @@ const Index = () => {
   };
 
   const renderProgressFlowers = () => {
+    const totalDays = progress?.total_days || 21;
+    const currentDay = progress?.current_day || 1;
+    
     return Array.from({ length: totalDays }, (_, index) => (
       <div
         key={index}
         className={`progress-flower ${
-          index < dayProgress 
+          index < currentDay 
             ? 'bg-florescer-copper text-white animate-bloom' 
             : 'bg-gray-200 text-gray-400'
         }`}
@@ -122,6 +145,19 @@ const Index = () => {
     </Card>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-florescer flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-florescer-copper rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="text-2xl">🌸</span>
+          </div>
+          <p className="text-florescer-dark font-lora text-lg">Carregando seus dados...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen gradient-florescer pb-20">
       {/* Header */}
@@ -129,7 +165,7 @@ const Index = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-lora font-bold text-florescer-dark text-shadow mb-1">
-              {getTimeGreeting()}, {userName}!
+              {getTimeGreeting()}, {profile?.name || 'Querida'}!
             </h1>
             <p className="text-florescer-dark/70 text-lg">Como você está se sentindo hoje?</p>
           </div>
@@ -148,7 +184,7 @@ const Index = () => {
           {moodOptions.map((mood) => (
             <button
               key={mood.value}
-              onClick={() => setCurrentMood(mood.value)}
+              onClick={() => handleMoodSelect(mood.value)}
               className={`mood-emoji transition-all duration-300 ${
                 currentMood === mood.value ? 'ring-3 ring-florescer-copper bg-florescer-copper/10 scale-110' : 'hover:scale-105'
               }`}
@@ -164,7 +200,7 @@ const Index = () => {
           <div className="text-center">
             <h3 className="font-lora font-bold text-xl mb-3 text-florescer-dark">Sua Jornada de Transformação</h3>
             <p className="text-florescer-dark/80 mb-4 text-lg">
-              Dia {dayProgress} de {totalDays} – Florescendo a cada passo...
+              Dia {progress?.current_day || 1} de {progress?.total_days || 21} – Florescendo a cada passo...
             </p>
             
             <div className="flex justify-center gap-1 mb-6 flex-wrap">
@@ -172,11 +208,11 @@ const Index = () => {
             </div>
             
             <Progress 
-              value={(dayProgress / totalDays) * 100} 
+              value={((progress?.current_day || 1) / (progress?.total_days || 21)) * 100} 
               className="h-4 bg-gray-200 mb-3"
             />
             <p className="text-sm text-florescer-dark/60 font-medium">
-              {Math.round((dayProgress / totalDays) * 100)}% da sua transformação concluída
+              {Math.round(((progress?.current_day || 1) / (progress?.total_days || 21)) * 100)}% da sua transformação concluída
             </p>
           </div>
         </Card>
