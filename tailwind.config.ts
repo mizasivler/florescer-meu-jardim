@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Florescer 21 custom colors
+				'florescer': {
+					'cream': '#FDF9F5',
+					'copper': '#A75C3F',
+					'olive': '#76865B',
+					'dark': '#3C3C3C',
+					'light-copper': '#D4956F',
+					'light-olive': '#A5B088'
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'bloom': {
+					'0%': { transform: 'scale(0)', opacity: '0' },
+					'50%': { transform: 'scale(1.1)', opacity: '0.8' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'gentle-pulse': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.7' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'bloom': 'bloom 0.6s ease-out',
+				'gentle-pulse': 'gentle-pulse 2s ease-in-out infinite'
+			},
+			fontFamily: {
+				'lora': ['Lora', 'serif'],
+				'nunito': ['Nunito', 'sans-serif']
 			}
 		}
 	},

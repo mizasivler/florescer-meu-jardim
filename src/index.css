@@ -1,83 +1,68 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 32 11% 97%;
+    --foreground: 0 0% 24%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 32 11% 97%;
+    --card-foreground: 0 0% 24%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 32 11% 97%;
+    --popover-foreground: 0 0% 24%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 18 45% 45%;
+    --primary-foreground: 32 11% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 74 16% 42%;
+    --secondary-foreground: 32 11% 97%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 32 11% 95%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 18 45% 45%;
+    --accent-foreground: 32 11% 97%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 32 11% 90%;
+    --input: 32 11% 90%;
+    --ring: 18 45% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 32 11% 97%;
+    --sidebar-foreground: 0 0% 24%;
+    --sidebar-primary: 18 45% 45%;
+    --sidebar-primary-foreground: 32 11% 97%;
+    --sidebar-accent: 32 11% 95%;
+    --sidebar-accent-foreground: 0 0% 24%;
+    --sidebar-border: 32 11% 90%;
+    --sidebar-ring: 18 45% 45%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
@@ -98,6 +83,46 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-florescer-cream text-florescer-dark font-nunito;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-lora;
+  }
+
+  .gradient-florescer {
+    background: linear-gradient(135deg, #FDF9F5 0%, #F5EDE4 100%);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 4px 20px rgba(167, 92, 63, 0.1);
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-florescer-copper hover:bg-florescer-light-copper text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 shadow-soft hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-florescer-olive hover:bg-florescer-light-olive text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 shadow-soft hover:shadow-lg;
+  }
+
+  .card-florescer {
+    @apply bg-white rounded-2xl p-6 shadow-soft border border-florescer-cream;
+  }
+
+  .mood-emoji {
+    @apply text-4xl p-4 rounded-full bg-white shadow-soft hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-110;
+  }
+
+  .progress-flower {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-lg;
   }
 }
