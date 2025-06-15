@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, User, Mail } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useUserData } from '@/hooks/useUserData';
-import { useToast } from '@/hooks/use-toast';
+import { Heart, ArrowRight, User, Smile, Activity } from 'lucide-react';
+import { useOnboarding, type OnboardingData } from '@/hooks/useOnboarding';
 
 interface OnboardingFlowProps {
   onComplete: () => void;
@@ -15,258 +13,161 @@ interface OnboardingFlowProps {
 
 const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
   const [step, setStep] = useState(1);
-  const [userData, setUserData] = useState({
-    name: '',
-    email: '',
-    initialMood: '',
-    menopauseType: ''
-  });
+  const [formData, setFormData] = useState<OnboardingData>({});
+  const { completeOnboarding, loading } = useOnboarding();
 
-  const { user, signUp, signIn } = useAuth();
-  const { updateProfile } = useUserData();
-  const { toast } = useToast();
-
-  const moodOptions = [
-    { emoji: '😴', label: 'Exausta e sem energia', value: 'exhausted', type: 'A' },
-    { emoji: '😰', label: 'Ansiosa e preocupada', value: 'anxious', type: 'B' },
-    { emoji: '🥺', label: 'Sensível e emotiva', value: 'sensitive', type: 'C' },
-    { emoji: '😤', label: 'Irritada com tudo', value: 'irritated', type: 'D' },
-    { emoji: '🌟', label: 'Otimista mas insegura', value: 'hopeful', type: 'E' }
-  ];
-
-  const menopauseTypes = {
-    A: {
-      title: "Menopausa do Cansaço",
-      description: "Você está passando por uma fase de exaustão física e mental. É natural sentir-se sem energia.",
-      message: "Sua jornada será focada em restaurar sua vitalidade gradualmente."
-    },
-    B: {
-      title: "Menopausa da Ansiedade", 
-      description: "As mudanças hormonais estão afetando seu sistema nervoso, gerando preocupações.",
-      message: "Vamos trabalhar técnicas de respiração e tranquilização."
-    },
-    C: {
-      title: "Menopausa Sensível",
-      description: "Suas emoções estão mais intensas. Isso é completamente normal nesta fase.",
-      message: "Focaremos em acolhimento emocional e autocompaixão."
-    },
-    D: {
-      title: "Menopausa da Irritação",
-      description: "A irritabilidade é um dos sintomas mais comuns. Você não está sozinha.",
-      message: "Trabalharemos paciência e técnicas de autorregulação."
-    },
-    E: {
-      title: "Menopausa da Esperança",
-      description: "Você mantém o otimismo, mas sente insegurança sobre as mudanças.",
-      message: "Vamos fortalecer sua confiança nesta nova fase da vida."
+  const handleNext = () => {
+    if (step < 3) {
+      setStep(step + 1);
+    } else {
+      handleComplete();
     }
   };
 
-  const handleMoodSelect = (mood: any) => {
-    setUserData(prev => ({
-      ...prev,
-      initialMood: mood.value,
-      menopauseType: mood.type
-    }));
-    setStep(3);
-  };
-
-  const handleCreateAccount = async () => {
-    try {
-      const { error } = await signUp(userData.email, '', userData.name);
-      
-      if (error) {
-        toast({
-          title: "Erro no cadastro",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Verifique seu e-mail para confirmar"
-      });
-      
-      setStep(2);
-    } catch (error) {
-      toast({
-        title: "Erro inesperado",
-        description: "Tente novamente em alguns instantes",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleCompleteOnboarding = async () => {
-    try {
-      if (user) {
-        await updateProfile({
-          initial_mood: userData.initialMood,
-          menopause_type: userData.menopauseType,
-          onboarding_completed: true
-        });
-      }
-      
-      localStorage.setItem('onboarding-completed', 'true');
+  const handleComplete = async () => {
+    console.log('Completing onboarding with data:', formData);
+    const { error } = await completeOnboarding(formData);
+    if (!error) {
       onComplete();
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      onComplete(); // Complete anyway to not block the user
     }
   };
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <Card className="card-florescer max-w-md mx-auto">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-florescer-copper rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="h-10 w-10 text-white" />
-              </div>
-              <h2 className="font-lora font-bold text-2xl mb-2">Bem-vinda ao Florescer 21</h2>
-              <p className="text-florescer-dark/70">
-                Sua jornada de autoconhecimento e bem-estar na menopausa começa aqui.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name" className="text-base font-medium">Nome</Label>
-                <Input
-                  id="name"
-                  placeholder="Digite seu nome"
-                  value={userData.name}
-                  onChange={(e) => setUserData(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 h-12 text-lg"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="email" className="text-base font-medium">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Digite seu e-mail"
-                  value={userData.email}
-                  onChange={(e) => setUserData(prev => ({ ...prev, email: e.target.value }))}
-                  className="mt-1 h-12 text-lg"
-                />
-              </div>
-
-              <Button 
-                onClick={() => setStep(2)} 
-                disabled={!userData.name || !userData.email}
-                className="btn-primary w-full mt-6 h-12 text-lg"
-              >
-                Continuar
-              </Button>
-            </div>
-          </Card>
-        );
-
-      case 2:
-        return (
-          <Card className="card-florescer max-w-md mx-auto">
-            <div className="text-center mb-6">
-              <h2 className="font-lora font-bold text-2xl mb-2">Como você está se sentindo?</h2>
-              <p className="text-florescer-dark/70">
-                Escolha a opção que mais representa seu estado atual
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {moodOptions.map((mood) => (
-                <button
-                  key={mood.value}
-                  onClick={() => handleMoodSelect(mood)}
-                  className="w-full p-4 text-left border border-gray-200 rounded-xl hover:bg-florescer-copper/5 hover:border-florescer-copper transition-all duration-300"
-                >
-                  <div className="flex items-center">
-                    <span className="text-3xl mr-4">{mood.emoji}</span>
-                    <span className="font-medium text-lg">{mood.label}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </Card>
-        );
-
-      case 3:
-        const typeInfo = menopauseTypes[userData.menopauseType as keyof typeof menopauseTypes];
-        return (
-          <Card className="card-florescer max-w-md mx-auto">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-florescer-olive rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🌸</span>
-              </div>
-              <h2 className="font-lora font-bold text-2xl mb-2">{typeInfo.title}</h2>
-              <p className="text-florescer-dark/70 mb-4">
-                {typeInfo.description}
-              </p>
-              <div className="bg-florescer-cream p-4 rounded-xl">
-                <p className="font-medium text-florescer-copper">
-                  {typeInfo.message}
-                </p>
-              </div>
-            </div>
-
-            <Button 
-              onClick={() => setStep(4)} 
-              className="btn-primary w-full h-12 text-lg"
-            >
-              Conhecer a Célia
-            </Button>
-          </Card>
-        );
-
-      case 4:
-        return (
-          <Card className="card-florescer max-w-md mx-auto">
-            <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-florescer-copper to-florescer-olive rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="h-12 w-12 text-white" />
-              </div>
-              <h2 className="font-lora font-bold text-2xl mb-4">Olá, sou a Célia</h2>
-              
-              <div className="bg-gradient-to-r from-florescer-copper/10 to-florescer-olive/10 p-6 rounded-xl mb-6 text-left">
-                <p className="text-lg leading-relaxed">
-                  "Querida {userData.name}, é uma alegria ter você aqui. 
-                  Durante os próximos 21 dias, estarei ao seu lado nesta jornada de 
-                  autoconhecimento e florescimento. Cada dia será uma oportunidade 
-                  de cuidar de você mesma com o carinho que merece."
-                </p>
-              </div>
-
-              <div className="flex gap-3 mb-6">
-                <Button variant="outline" className="flex-1">
-                  🔊 Ouvir em áudio
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  💗 Salvar no coração
-                </Button>
-              </div>
-
-              <Button 
-                onClick={handleCompleteOnboarding} 
-                className="btn-primary w-full h-12 text-lg"
-              >
-                Começar minha jornada
-              </Button>
-            </div>
-          </Card>
-        );
-
-      default:
-        return null;
-    }
+  const updateFormData = (field: keyof OnboardingData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
     <div className="min-h-screen gradient-florescer flex items-center justify-center p-6">
-      {renderStep()}
+      <Card className="card-florescer max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-florescer-copper rounded-full flex items-center justify-center mx-auto mb-4">
+            <Heart className="h-10 w-10 text-white" />
+          </div>
+          <h1 className="text-3xl font-lora font-bold text-florescer-dark mb-2">
+            Bem-vinda ao Florescer 21
+          </h1>
+          <p className="text-florescer-dark/70 text-lg">
+            Vamos personalizar sua jornada de transformação
+          </p>
+          
+          {/* Progress indicator */}
+          <div className="flex justify-center mt-6 space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`w-3 h-3 rounded-full ${
+                  i <= step ? 'bg-florescer-copper' : 'bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {step === 1 && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <User className="w-12 h-12 text-florescer-copper mx-auto mb-3" />
+              <h2 className="text-2xl font-bold text-florescer-dark">Como você gostaria de ser chamada?</h2>
+              <p className="text-florescer-dark/70">Personalizaremos sua experiência</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="name" className="text-base font-medium">Seu nome</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Digite seu nome"
+                value={formData.name || ''}
+                onChange={(e) => updateFormData('name', e.target.value)}
+                className="mt-1 h-12 text-lg"
+              />
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <Smile className="w-12 h-12 text-florescer-copper mx-auto mb-3" />
+              <h2 className="text-2xl font-bold text-florescer-dark">Como você está se sentindo?</h2>
+              <p className="text-florescer-dark/70">Vamos começar conhecendo seu estado atual</p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { value: 'tired', label: 'Cansada', emoji: '😴' },
+                { value: 'anxious', label: 'Ansiosa', emoji: '😰' },
+                { value: 'sensitive', label: 'Sensível', emoji: '🥺' },
+                { value: 'irritated', label: 'Irritada', emoji: '😤' },
+                { value: 'hopeful', label: 'Esperançosa', emoji: '🌟' }
+              ].map((mood) => (
+                <button
+                  key={mood.value}
+                  onClick={() => updateFormData('initialMood', mood.value)}
+                  className={`p-4 rounded-2xl border-2 transition-all text-left ${
+                    formData.initialMood === mood.value
+                      ? 'border-florescer-copper bg-florescer-copper/10'
+                      : 'border-gray-200 hover:border-florescer-copper/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{mood.emoji}</span>
+                    <span className="font-medium text-florescer-dark">{mood.label}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <Activity className="w-12 h-12 text-florescer-copper mx-auto mb-3" />
+              <h2 className="text-2xl font-bold text-florescer-dark">Sobre sua menopausa</h2>
+              <p className="text-florescer-dark/70">Isso nos ajuda a personalizar seu programa</p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { value: 'perimenopause', label: 'Pré-menopausa', desc: 'Ciclos irregulares' },
+                { value: 'menopause', label: 'Menopausa', desc: 'Sem menstruar há 12+ meses' },
+                { value: 'postmenopause', label: 'Pós-menopausa', desc: 'Menopausa há mais de 1 ano' },
+                { value: 'not_sure', label: 'Não tenho certeza', desc: 'Vamos descobrir juntas' }
+              ].map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => updateFormData('menopauseType', type.value)}
+                  className={`p-4 rounded-2xl border-2 transition-all text-left ${
+                    formData.menopauseType === type.value
+                      ? 'border-florescer-copper bg-florescer-copper/10'
+                      : 'border-gray-200 hover:border-florescer-copper/50'
+                  }`}
+                >
+                  <div className="font-medium text-florescer-dark">{type.label}</div>
+                  <div className="text-sm text-florescer-dark/70">{type.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-8">
+          <Button 
+            onClick={handleNext}
+            disabled={loading || (step === 1 && !formData.name)}
+            className="btn-primary w-full h-12 text-lg"
+          >
+            {loading 
+              ? 'Salvando...' 
+              : step === 3 
+                ? 'Começar Jornada' 
+                : 'Continuar'
+            }
+            {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 };

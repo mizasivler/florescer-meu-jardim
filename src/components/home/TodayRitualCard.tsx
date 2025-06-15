@@ -1,17 +1,48 @@
 
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Clock, CheckCircle, Star, Droplets } from 'lucide-react';
+import { Clock, CheckCircle, Star } from 'lucide-react';
+import { useRituals } from '@/hooks/useRituals';
 
 const TodayRitualCard = () => {
   const navigate = useNavigate();
+  const { getTodayRitualProgress } = useRituals();
+  const [ritualProgress, setRitualProgress] = useState({
+    completedSteps: [] as string[],
+    totalSteps: 3
+  });
 
-  // Mock data for ritual progress
+  useEffect(() => {
+    loadRitualProgress();
+  }, []);
+
+  const loadRitualProgress = async () => {
+    const progress = await getTodayRitualProgress();
+    setRitualProgress(progress);
+  };
+
+  // Mock data for ritual steps with dynamic completion status
   const ritualSteps = [
-    { name: 'Respiração', completed: true, icon: '🌬️' },
-    { name: 'Afirmação', completed: false, icon: '💖' },
-    { name: 'Gratidão', completed: false, icon: '🙏' }
+    { 
+      name: 'Respiração', 
+      type: 'breathing',
+      completed: ritualProgress.completedSteps.includes('breathing'), 
+      icon: '🌬️' 
+    },
+    { 
+      name: 'Afirmação', 
+      type: 'affirmation',
+      completed: ritualProgress.completedSteps.includes('affirmation'), 
+      icon: '💖' 
+    },
+    { 
+      name: 'Gratidão', 
+      type: 'gratitude',
+      completed: ritualProgress.completedSteps.includes('gratitude'), 
+      icon: '🙏' 
+    }
   ];
 
   const completedSteps = ritualSteps.filter(step => step.completed).length;
@@ -50,7 +81,7 @@ const TodayRitualCard = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-yellow-300" />
-                  <span className="text-purple-100 font-medium">+50 XP</span>
+                  <span className="text-purple-100 font-medium">+30 XP</span>
                 </div>
               </div>
             </div>

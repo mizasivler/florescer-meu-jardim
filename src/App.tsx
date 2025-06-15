@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
@@ -5,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useUserData } from "@/hooks/useUserData";
 import OnboardingFlow from "@/components/OnboardingFlow";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -20,22 +22,26 @@ import Navigation from "@/components/Navigation";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useUserData();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
-      const onboardingCompleted = localStorage.getItem('onboarding-completed');
+    console.log('Auth state:', { user: !!user, authLoading, profile, profileLoading });
+    
+    if (!authLoading && !profileLoading && user && profile) {
+      // Check if onboarding is completed based on database
+      const onboardingCompleted = profile.onboarding_completed;
+      console.log('Onboarding completed from DB:', onboardingCompleted);
       setShowOnboarding(!onboardingCompleted);
     }
-  }, [user, loading]);
+  }, [user, authLoading, profile, profileLoading]);
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('onboarding-completed', 'true');
     setShowOnboarding(false);
   };
 
-  if (loading) {
+  if (authLoading || (user && profileLoading)) {
     return (
       <div className="min-h-screen gradient-florescer flex items-center justify-center">
         <div className="text-center">
