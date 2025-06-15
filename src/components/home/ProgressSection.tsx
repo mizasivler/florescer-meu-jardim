@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Target, Calendar, Trophy } from 'lucide-react';
@@ -24,7 +23,7 @@ const ProgressSection = ({ progress }: ProgressSectionProps) => {
         key={index}
         className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
           index < currentDay 
-            ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg animate-gentle-pulse' 
+            ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg' 
             : 'bg-gray-100 text-gray-400 border-2 border-dashed border-gray-300'
         }`}
       >
