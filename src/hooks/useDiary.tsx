@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +7,7 @@ import { convertToFrontendMood } from '@/utils/moodMapping';
 import { useDiaryOperations } from './useDiaryOperations';
 import { calculateDiaryStats } from '@/utils/diaryStats';
 
-export { DiaryEntry, NewDiaryEntry } from '@/types/diary';
+export type { DiaryEntry, NewDiaryEntry } from '@/types/diary';
 
 export const useDiary = () => {
   const { user } = useAuth();
