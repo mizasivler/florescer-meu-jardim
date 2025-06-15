@@ -74,14 +74,17 @@ const Header = ({ profile }: HeaderProps) => {
           <button
             key={mood.value}
             onClick={() => handleMoodSelect(mood.value)}
-            className={`flex-1 aspect-square rounded-2xl bg-white shadow-sm border-2 transition-all duration-300 flex items-center justify-center text-3xl ${
+            className={`flex-1 rounded-2xl bg-white shadow-sm border-2 transition-all duration-300 flex flex-col items-center justify-center py-4 px-2 ${
               currentMood === mood.value 
                 ? 'border-purple-400 bg-purple-50 scale-105' 
                 : 'border-gray-100 hover:border-gray-200 hover:scale-105'
             }`}
             title={mood.label}
           >
-            {mood.emoji}
+            <span className="text-2xl mb-2">{mood.emoji}</span>
+            <span className="text-xs font-medium text-gray-600 text-center leading-tight">
+              {mood.label}
+            </span>
           </button>
         ))}
       </div>
