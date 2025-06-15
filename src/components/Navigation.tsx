@@ -29,13 +29,13 @@ const Navigation = () => {
               className={`flex flex-col items-center gap-2 px-3 py-4 h-auto rounded-2xl transition-all duration-500 ${
                 isActive 
                   ? 'scale-105' 
-                  : 'hover:shadow-md hover:-translate-y-0.5'
+                  : 'hover:shadow-sm hover:-translate-y-0.5'
               }`}
             >
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 relative ${
                 isActive 
-                  ? 'shadow-lg animate-gentle-pulse' 
-                  : 'bg-gray-100 hover:bg-gray-200 hover:shadow-sm'
+                  ? 'shadow-lg' 
+                  : 'bg-gray-100 hover:shadow-sm'
               }`}>
                 {isActive && (
                   <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${item.gradient} opacity-20 backdrop-blur-sm border border-white/30`} />
@@ -46,7 +46,7 @@ const Navigation = () => {
                     : ''
                 }`}>
                   <item.icon className={`h-5 w-5 transition-all duration-500 ${
-                    isActive ? 'text-white animate-subtle-pulse' : 'text-gray-600'
+                    isActive ? 'text-white' : 'text-gray-600'
                   }`} />
                 </div>
               </div>
@@ -56,7 +56,7 @@ const Navigation = () => {
                 {item.label}
               </span>
               {isActive && (
-                <div className="w-1 h-1 bg-gray-400 rounded-full animate-gentle-pulse" />
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
               )}
             </Button>
           );
