@@ -71,7 +71,7 @@ const RitualOfTheDay = () => {
   const progressPercentage = (completedSteps.length / ritualSteps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pb-20">
+    <div className="min-h-screen gradient-florescer pb-20">
       {/* Header */}
       <div className="px-6 pt-8 pb-6">
         <div className="flex items-center gap-4 mb-8">
@@ -79,28 +79,28 @@ const RitualOfTheDay = () => {
             variant="ghost" 
             size="sm" 
             onClick={() => navigate('/')}
-            className="text-gray-600 hover:bg-white/50 rounded-full p-3"
+            className="text-florescer-copper hover:bg-white/50 rounded-full p-3"
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Ritual do Dia</h1>
-            <p className="text-gray-600 text-lg">Comece seu dia com intenção</p>
+            <h1 className="text-3xl font-lora font-bold text-florescer-dark">Ritual do Dia</h1>
+            <p className="text-florescer-dark/70 text-lg">Comece seu dia com intenção</p>
           </div>
         </div>
 
         {/* Progress Card */}
-        <Card className="bg-white rounded-3xl p-8 shadow-sm mb-8">
+        <Card className="card-florescer mb-8">
           <div className="text-center">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Seu Progresso Hoje</h3>
+            <h3 className="text-xl font-lora font-bold text-florescer-dark mb-4">Seu Progresso Hoje</h3>
             <div className="flex items-center justify-center gap-3 mb-6">
               <span className="text-4xl">🌸</span>
-              <span className="text-gray-600 text-lg">
+              <span className="text-florescer-dark/70 text-lg">
                 {completedSteps.length} de {ritualSteps.length} concluídos
               </span>
             </div>
             <Progress value={progressPercentage} className="h-4 bg-gray-100 mb-4" />
-            <p className="text-gray-500">
+            <p className="text-florescer-dark/60">
               {Math.round(progressPercentage)}% do ritual completo
             </p>
           </div>
@@ -115,8 +115,8 @@ const RitualOfTheDay = () => {
           return (
             <Card 
               key={step.id}
-              className={`bg-white rounded-3xl p-6 shadow-sm transition-all duration-300 ${
-                isCompleted ? 'ring-2 ring-purple-200 bg-purple-50' : ''
+              className={`card-florescer transition-all duration-300 ${
+                isCompleted ? 'ring-2 ring-florescer-copper bg-florescer-copper/5' : ''
               }`}
             >
               <div className="space-y-4">
@@ -124,7 +124,7 @@ const RitualOfTheDay = () => {
                 <div className="flex items-start gap-4">
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
                     isCompleted 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
+                      ? 'bg-florescer-copper' 
                       : `bg-gradient-to-r ${step.gradient}`
                   }`}>
                     {isCompleted ? (
@@ -136,24 +136,24 @@ const RitualOfTheDay = () => {
                   
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-bold text-gray-800">
+                      <h3 className="text-xl font-lora font-bold text-florescer-dark">
                         {step.title}
                       </h3>
-                      <div className="flex items-center gap-1 text-gray-500">
+                      <div className="flex items-center gap-1 text-florescer-dark/60">
                         <Clock className="h-4 w-4" />
                         <span className="text-sm font-medium">{step.duration}</span>
                       </div>
                     </div>
                     
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-florescer-dark/70 mb-4">
                       {step.description}
                     </p>
                   </div>
                 </div>
                 
                 {/* Instructions */}
-                <div className="bg-gray-50 rounded-2xl p-4">
-                  <p className="text-gray-700 italic leading-relaxed">
+                <div className="bg-florescer-cream/50 rounded-2xl p-4">
+                  <p className="text-florescer-dark italic leading-relaxed">
                     "{step.instructions}"
                   </p>
                 </div>
@@ -164,7 +164,7 @@ const RitualOfTheDay = () => {
                   disabled={loading}
                   className={`w-full rounded-2xl font-semibold py-4 ${
                     isCompleted
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                      ? 'bg-florescer-copper hover:bg-florescer-light-copper'
                       : `bg-gradient-to-r ${step.gradient} hover:opacity-90`
                   } text-white border-none transition-all duration-300`}
                 >
@@ -179,11 +179,11 @@ const RitualOfTheDay = () => {
       {/* Completion Message */}
       {completedSteps.length === ritualSteps.length && (
         <div className="px-6 mt-8">
-          <Card className="bg-gradient-to-r from-green-400 to-emerald-400 text-white rounded-3xl p-8 shadow-lg">
+          <Card className="bg-gradient-to-r from-florescer-olive to-florescer-light-olive text-white rounded-3xl p-8 shadow-glow">
             <div className="text-center">
               <div className="text-5xl mb-4">🌟</div>
-              <h3 className="text-2xl font-bold mb-3">Parabéns!</h3>
-              <p className="text-green-100 mb-6 text-lg leading-relaxed">
+              <h3 className="text-2xl font-lora font-bold mb-3">Parabéns!</h3>
+              <p className="text-white/90 mb-6 text-lg leading-relaxed">
                 Você completou seu ritual matinal. Que seu dia seja repleto de energia positiva!
               </p>
               <Button 

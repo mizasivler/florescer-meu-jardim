@@ -144,7 +144,7 @@ const Meditation = () => {
     : meditations.filter(med => med.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pb-20">
+    <div className="min-h-screen gradient-florescer pb-20">
       <MeditationHeader stats={stats} />
       
       <div className="px-6">
