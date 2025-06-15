@@ -26,23 +26,23 @@ const Settings = () => {
     {
       category: 'Conta',
       items: [
-        { icon: User, label: 'Perfil Pessoal', description: 'Editar informações pessoais', action: () => {} },
-        { icon: Bell, label: 'Notificações', description: 'Gerenciar lembretes e alertas', action: () => {} },
-        { icon: Shield, label: 'Privacidade', description: 'Configurações de dados pessoais', action: () => {} }
+        { icon: User, label: 'Perfil Pessoal', description: 'Editar informações pessoais', action: () => navigate('/profile') },
+        { icon: Bell, label: 'Notificações', description: 'Gerenciar lembretes e alertas', action: () => navigate('/notifications') },
+        { icon: Shield, label: 'Privacidade', description: 'Configurações de dados pessoais', action: () => navigate('/privacy') }
       ]
     },
     {
       category: 'Jornada',
       items: [
         { icon: Heart, label: 'Meu Progresso', description: 'Histórico e conquistas', action: () => navigate('/forest') },
-        { icon: User, label: 'Tipo de Menopausa', description: 'Atualizar questionário inicial', action: () => {} }
+        { icon: User, label: 'Tipo de Menopausa', description: 'Atualizar questionário inicial', action: () => navigate('/onboarding-update') }
       ]
     },
     {
       category: 'Suporte',
       items: [
         { icon: Heart, label: 'Falar com Célia', description: 'Conversar com sua mentora', action: () => navigate('/celia') },
-        { icon: Shield, label: 'Suporte', description: 'Ajuda e contato', action: () => {} }
+        { icon: Shield, label: 'Suporte', description: 'Ajuda e contato', action: () => navigate('/support') }
       ]
     }
   ];
@@ -73,7 +73,7 @@ const Settings = () => {
           <div className="flex items-center gap-4">
             <ProfileAvatarUpload
               userId={profile?.id || "anon"}
-              currentAvatarUrl={avatarUrl}
+              currentAvatarUrl={profile?.avatar_url || undefined}
               onUploaded={handleAvatarUploaded}
             />
             <div className="flex-1">
@@ -85,7 +85,7 @@ const Settings = () => {
                 Dia {progress?.current_day || 1} da jornada • Premium
               </p>
             </div>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>

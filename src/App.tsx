@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
@@ -18,6 +17,12 @@ import Planner from "@/pages/Planner";
 import EmotionDiary from "@/pages/EmotionDiary";
 import Settings from "@/pages/Settings";
 import Navigation from "@/components/Navigation";
+import Profile from "./pages/Profile";
+import Notifications from "./pages/Notifications";
+import Privacy from "./pages/Privacy";
+import OnboardingUpdate from "./pages/OnboardingUpdate";
+import Celia from "./pages/Celia";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +78,12 @@ const AppContent = () => {
         <Route path="/forest" element={<MyGarden />} />
         <Route path="/emergency" element={<EmergencyMeditation />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/onboarding-update" element={<OnboardingUpdate />} />
+        <Route path="/celia" element={<Celia />} />
+        <Route path="/support" element={<Support />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Navigation />
