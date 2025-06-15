@@ -20,10 +20,25 @@ export type DatabaseMood = keyof typeof reverseMoodMapping;
 export type FrontendMood = keyof typeof moodMapping;
 
 export const convertToFrontendMood = (dbMood: DatabaseMood | null | undefined): FrontendMood => {
-  if (!dbMood) return 'esperançosa';
-  return reverseMoodMapping[dbMood] || 'esperançosa';
+  console.log('🔄 convertToFrontendMood - entrada:', dbMood);
+  if (!dbMood) {
+    console.log('⚠️ dbMood é null/undefined, retornando esperançosa');
+    return 'esperançosa';
+  }
+  const result = reverseMoodMapping[dbMood] || 'esperançosa';
+  console.log('✅ convertToFrontendMood - resultado:', result);
+  return result;
 };
 
 export const convertToDatabaseMood = (frontendMood: FrontendMood): DatabaseMood => {
-  return moodMapping[frontendMood];
+  console.log('🔄 convertToDatabaseMood - entrada:', frontendMood);
+  const result = moodMapping[frontendMood];
+  console.log('✅ convertToDatabaseMood - resultado:', result);
+  
+  if (!result) {
+    console.error('❌ ERRO: Mood não encontrado no mapeamento:', frontendMood);
+    console.error('📋 Moods disponíveis:', Object.keys(moodMapping));
+  }
+  
+  return result;
 };

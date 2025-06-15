@@ -31,9 +31,20 @@ const EmotionDiary = () => {
   };
 
   const saveEntry = async () => {
+    console.log('=== INÍCIO DO SALVAMENTO ===');
+    console.log('Estado atual do newEntry:', newEntry);
+    
     if (newEntry.title && newEntry.content && newEntry.mood) {
       // Use the emoji to get the correct mood key
       const moodKey = emojiToMoodMap[newEntry.mood];
+      console.log('Emoji selecionado:', newEntry.mood);
+      console.log('Mood key mapeado:', moodKey);
+      
+      // Validar se o moodKey foi encontrado
+      if (!moodKey) {
+        console.error('ERRO: Mood key não encontrado para emoji:', newEntry.mood);
+        return;
+      }
       
       const entryData = {
         title: newEntry.title,
@@ -43,10 +54,14 @@ const EmotionDiary = () => {
         tags: []
       };
 
-      console.log('Saving entry with mood:', moodKey);
+      console.log('Dados que serão enviados para o banco:', entryData);
+      console.log('Gratitude items filtrados:', entryData.gratitude_items);
 
       const success = await addEntry(entryData);
+      console.log('Resultado do addEntry:', success);
+      
       if (success.error === null) {
+        console.log('✅ Entrada salva com sucesso!');
         setIsWriting(false);
         setNewEntry({
           mood: '',
@@ -56,8 +71,16 @@ const EmotionDiary = () => {
           gratitude: ['', '', ''],
           tags: []
         });
+      } else {
+        console.error('❌ Erro ao salvar entrada:', success.error);
       }
+    } else {
+      console.log('❌ Validação falhou - campos obrigatórios:');
+      console.log('- title:', newEntry.title);
+      console.log('- content:', newEntry.content);
+      console.log('- mood:', newEntry.mood);
     }
+    console.log('=== FIM DO SALVAMENTO ===');
   };
 
   if (isWriting) {

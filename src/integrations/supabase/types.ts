@@ -46,6 +46,7 @@ export type Database = {
           content: string
           created_at: string | null
           date: string
+          gratitude_items: Json | null
           id: string
           mood: Database["public"]["Enums"]["mood_type"] | null
           title: string
@@ -56,6 +57,7 @@ export type Database = {
           content: string
           created_at?: string | null
           date?: string
+          gratitude_items?: Json | null
           id?: string
           mood?: Database["public"]["Enums"]["mood_type"] | null
           title: string
@@ -66,6 +68,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           date?: string
+          gratitude_items?: Json | null
           id?: string
           mood?: Database["public"]["Enums"]["mood_type"] | null
           title?: string

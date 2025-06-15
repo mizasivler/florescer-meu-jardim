@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { DiaryEntry, NewDiaryEntry } from '@/types/diary';
 import { convertToFrontendMood, convertToDatabaseMood } from '@/utils/moodMapping';
@@ -11,6 +10,8 @@ export interface DiaryOperationResult<T = any> {
 export const diaryOperations = {
   async loadEntries(userId: string): Promise<DiaryOperationResult<DiaryEntry[]>> {
     try {
+      console.log('🔄 Carregando entradas do usuário:', userId);
+      
       const { data, error } = await supabase
         .from('diary_entries')
         .select('*')
@@ -18,44 +19,66 @@ export const diaryOperations = {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading diary entries:', error);
+        console.error('❌ Erro ao carregar entradas do diário:', error);
         return { error: 'Não foi possível carregar suas entradas do diário.' };
       }
 
-      // Convert database entries to frontend format
-      const convertedEntries: DiaryEntry[] = (data || []).map(entry => ({
-        ...entry,
-        mood: convertToFrontendMood(entry.mood),
-        created_at: entry.created_at || '',
-        updated_at: entry.updated_at || ''
-      }));
+      console.log('✅ Entradas carregadas do banco:', data);
 
+      // Convert database entries to frontend format
+      const convertedEntries: DiaryEntry[] = (data || []).map(entry => {
+        const convertedMood = convertToFrontendMood(entry.mood);
+        console.log(`Convertendo mood: ${entry.mood} → ${convertedMood}`);
+        
+        return {
+          ...entry,
+          mood: convertedMood,
+          created_at: entry.created_at || '',
+          updated_at: entry.updated_at || ''
+        };
+      });
+
+      console.log('✅ Entradas convertidas para frontend:', convertedEntries);
       return { error: null, data: convertedEntries };
     } catch (error) {
-      console.error('Error in loadEntries:', error);
+      console.error('❌ Erro inesperado em loadEntries:', error);
       return { error: 'Erro ao carregar entradas' };
     }
   },
 
   async addEntry(userId: string, entryData: NewDiaryEntry): Promise<DiaryOperationResult<DiaryEntry>> {
     try {
+      console.log('💾 Iniciando salvamento da entrada...');
+      console.log('📋 Dados recebidos:', entryData);
+      console.log('👤 User ID:', userId);
+      
+      // Convert mood to database format
+      const dbMood = convertToDatabaseMood(entryData.mood);
+      console.log(`🔄 Conversão de mood: ${entryData.mood} → ${dbMood}`);
+      
+      const dataToInsert = {
+        user_id: userId,
+        title: entryData.title,
+        content: entryData.content,
+        mood: dbMood,
+        date: new Date().toISOString().split('T')[0],
+        gratitude_items: entryData.gratitude_items || []
+      };
+      
+      console.log('📤 Dados que serão inseridos no banco:', dataToInsert);
+
       const { data, error } = await supabase
         .from('diary_entries')
-        .insert({
-          user_id: userId,
-          title: entryData.title,
-          content: entryData.content,
-          mood: convertToDatabaseMood(entryData.mood),
-          date: new Date().toISOString().split('T')[0],
-          gratitude_items: entryData.gratitude_items
-        })
+        .insert(dataToInsert)
         .select()
         .single();
 
       if (error) {
-        console.error('Error adding diary entry:', error);
+        console.error('❌ Erro do Supabase ao inserir:', error);
         throw error;
       }
+
+      console.log('✅ Entrada inserida no banco com sucesso:', data);
 
       // Convert database entry to frontend format
       const convertedEntry: DiaryEntry = {
@@ -65,9 +88,16 @@ export const diaryOperations = {
         updated_at: data.updated_at || ''
       };
 
+      console.log('🔄 Entrada convertida para frontend:', convertedEntry);
       return { error: null, data: convertedEntry };
     } catch (error: any) {
-      console.error('Error in addEntry:', error);
+      console.error('❌ Erro crítico em addEntry:', error);
+      console.error('📊 Detalhes do erro:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       return { error: 'Não foi possível salvar sua entrada. Tente novamente.' };
     }
   },
