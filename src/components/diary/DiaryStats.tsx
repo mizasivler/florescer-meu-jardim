@@ -8,14 +8,18 @@ interface DiaryStatsProps {
 
 const DiaryStats = ({ entries }: DiaryStatsProps) => {
   const getMoodEmoji = (mood: string) => {
-    // Mapeamento consistente com EntryList
-    switch (mood.toLowerCase()) {
-      case 'esperançosa': return '🌟';
+    // Mapeamento baseado nos humores padronizados
+    const normalizedMood = mood.toLowerCase();
+    switch (normalizedMood) {
+      case 'esperançosa':
+      case 'esperancosa': // fallback
+        return '🌟';
       case 'aflita': return '😰';
       case 'cansada': return '😴';
       case 'irritada': return '😤';
-      case 'sensível': return '🥺';
-      case 'sensivel': return '🥺'; // fallback sem acento
+      case 'sensível':
+      case 'sensivel': // fallback
+        return '🥺';
       default: return '😊';
     }
   };
