@@ -86,19 +86,22 @@ const EmotionDiary = () => {
             <Card className="card-florescer">
               <div>
                 <h3 className="font-lora font-semibold text-lg mb-4">Como você está se sentindo?</h3>
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center gap-3">
                   {moodOptions.map((mood) => (
                     <button
                       key={mood.label}
                       onClick={() => {
                         setNewEntry({...newEntry, mood: mood.emoji, moodLabel: mood.label});
                       }}
-                      className={`w-16 h-16 text-3xl rounded-2xl border-2 transition-all duration-300 hover:scale-110 ${
+                      className={`flex flex-col items-center justify-center py-3 px-2 min-h-[80px] rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
                         newEntry.mood === mood.emoji ? 'ring-2 ring-florescer-copper bg-florescer-copper/10 border-florescer-copper' : 'border-gray-200 hover:border-florescer-copper'
                       }`}
                       title={mood.label}
                     >
-                      {mood.emoji}
+                      <span className="text-2xl mb-1">{mood.emoji}</span>
+                      <span className="text-xs font-medium text-center text-florescer-dark/80">
+                        {mood.label}
+                      </span>
                     </button>
                   ))}
                 </div>
