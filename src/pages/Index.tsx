@@ -17,12 +17,14 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pb-20">
-      <Header profile={profile} />
-      <TodayRitualCard />
-      <ProgressSection progress={progress} />
-      <MainActions />
-      <PremiumCTA />
+    <div className="min-h-screen gradient-florescer pb-20">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
+        <Header profile={profile} />
+        <TodayRitualCard />
+        <ProgressSection progress={progress} />
+        <MainActions />
+        <PremiumCTA />
+      </div>
     </div>
   );
 };
