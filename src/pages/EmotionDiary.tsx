@@ -7,6 +7,7 @@ import EntryForm from '@/components/diary/EntryForm';
 import DiaryStats from '@/components/diary/DiaryStats';
 import EntryList from '@/components/diary/EntryList';
 import EmptyState from '@/components/diary/EmptyState';
+import PageHeader from "@/components/PageHeader";
 
 const EmotionDiary = () => {
   const navigate = useNavigate();
@@ -97,25 +98,13 @@ const EmotionDiary = () => {
 
   return (
     <div className="min-h-screen gradient-florescer pb-20">
-      {/* Header */}
+      {/* Header padronizado */}
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/')}
-            className="text-florescer-copper"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-lora font-bold text-florescer-dark">
-              Diário da Emoção
-            </h1>
-            <p className="text-florescer-dark/70">Suas reflexões e sentimentos</p>
-          </div>
-        </div>
-
+        <PageHeader
+          title="Diário da Emoção"
+          description="Suas reflexões e sentimentos"
+          onBack={() => navigate('/')}
+        />
         <DiaryStats entries={entries} />
       </div>
 

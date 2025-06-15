@@ -1,10 +1,12 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const MyGarden = () => {
+  const navigate = useNavigate();
   const [completedDays, setCompletedDays] = useState(5);
   const [achievements, setAchievements] = useState([
     { id: 1, name: 'Primeira Flor', icon: '🌱', unlocked: true, day: 1 },
@@ -47,17 +49,15 @@ const MyGarden = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-florescer p-6">
-      <div className="max-w-md mx-auto">
-        <div className="text-center mb-6">
-          <h1 className="font-lora font-bold text-3xl mb-2 text-florescer-dark">
-            Meu Jardim
-          </h1>
-          <p className="text-florescer-dark/70">
-            Cada ritual concluído faz uma nova flor crescer
-          </p>
-        </div>
-
+    <div className="min-h-screen gradient-florescer pb-20">
+      <div className="p-6 pb-4">
+        <PageHeader 
+          title="Meu Jardim"
+          description="Cada ritual concluído faz uma nova flor crescer"
+          onBack={() => navigate('/')}
+        />
+      </div>
+      <div className="max-w-md mx-auto px-6">
         {/* Progress Summary */}
         <Card className="card-florescer mb-6">
           <div className="text-center">
