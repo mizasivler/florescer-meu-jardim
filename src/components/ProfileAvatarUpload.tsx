@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Camera } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileAvatarUploadProps {
   userId: string;
@@ -13,14 +14,26 @@ interface ProfileAvatarUploadProps {
 export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUploaded }: ProfileAvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
+  const { toast } = useToast();
 
   // Preview image before upload
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMessage(null);
     const file = e.target.files?.[0];
     if (file) {
-      if (!["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.type) || file.size > 2 * 1024 * 1024) {
-        alert("A imagem deve ser JPG/PNG/WebP e no máximo 2MB");
+      // Checagem estendida de tipo e tamanho
+      if (!["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.type)) {
+        const msg = "A imagem deve ser JPG/PNG/WebP";
+        setErrorMessage(msg);
+        toast({ title: "Tipo de imagem inválido", description: msg, variant: "destructive" });
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        const msg = "A imagem deve ter no máximo 2MB";
+        setErrorMessage(msg);
+        toast({ title: "Imagem muito grande", description: msg, variant: "destructive" });
         return;
       }
       setPreviewUrl(URL.createObjectURL(file));
@@ -31,23 +44,44 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
   // Handle the upload and save public URL
   async function handleUpload(file: File) {
     setUploading(true);
-    const fileExt = file.name.split(".").pop();
-    const filePath = `${userId}/${Date.now()}.${fileExt}`;
-    const { error } = await supabase.storage.from("avatars").upload(filePath, file, {
-      upsert: true,
-      cacheControl: "3600"
-    });
+    setErrorMessage(null);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${userId}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage.from("avatars").upload(filePath, file, {
+        upsert: true,
+        cacheControl: "3600"
+      });
 
-    if (error) {
-      alert("Falha ao fazer upload do avatar.");
+      if (error) {
+        console.error("Supabase upload error:", error);
+        const msg = "Falha ao fazer upload do avatar. Verifique sua conexão ou tente novamente.";
+        setErrorMessage(msg);
+        toast({ title: "Erro no upload", description: msg, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+
+      // Get the public URL
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      if (!data?.publicUrl) {
+        const msg = "URL pública não encontrada para o avatar.";
+        setErrorMessage(msg);
+        toast({ title: "Erro", description: msg, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+
+      onUploaded(data.publicUrl);
+      toast({ title: "Avatar atualizado!", description: "Sua foto foi atualizada com sucesso." });
       setUploading(false);
-      return;
+    } catch (err: any) {
+      console.error("Erro inesperado no upload de avatar:", err);
+      const msg = "Erro inesperado ao fazer upload do avatar.";
+      setErrorMessage(msg);
+      toast({ title: "Erro inesperado", description: msg, variant: "destructive" });
+      setUploading(false);
     }
-
-    // Get the public URL
-    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-    onUploaded(data.publicUrl);
-    setUploading(false);
   }
 
   return (
@@ -75,6 +109,9 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
         onChange={handleChange}
       />
       <span className="text-xs text-gray-500">PNG, JPG, ou WEBP até 2MB</span>
+      {errorMessage && (
+        <div className="text-xs text-red-600 text-center mt-1 max-w-[180px]">{errorMessage}</div>
+      )}
     </div>
   );
 }
