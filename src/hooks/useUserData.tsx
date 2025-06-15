@@ -4,7 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { errorLogger } from '@/utils/errorLogger';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Profile = Tables<'profiles'>;
+type Profile = {
+  created_at: string | null;
+  email: string;
+  id: string;
+  initial_mood: string | null;
+  menopause_type: string | null;
+  name: string;
+  onboarding_completed: boolean | null;
+  updated_at: string | null;
+  avatar_url?: string | null; // TEMPORARY PATCH for new column
+};
+
 type UserProgress = Tables<'user_progress'>;
 
 export const useUserData = () => {

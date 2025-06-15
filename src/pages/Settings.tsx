@@ -8,7 +8,7 @@ import ProfileAvatarUpload from "@/components/ProfileAvatarUpload";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { profile, saveAvatarUrl, refetch } = useUserData();
+  const { profile, progress, saveAvatarUrl, refetch } = useUserData();
   const [notifications, setNotifications] = useState(true);
 
   // Mostra dados fictícios só se o user não estiver logado ainda
@@ -81,7 +81,9 @@ const Settings = () => {
                 {userName}
               </h3>
               <p className="text-florescer-dark/60 text-sm">{userEmail}</p>
-              <p className="text-florescer-copper text-sm mt-1">Dia {profile?.current_day || 1} da jornada • Premium</p>
+              <p className="text-florescer-copper text-sm mt-1">
+                Dia {progress?.current_day || 1} da jornada • Premium
+              </p>
             </div>
             <Button variant="ghost" size="sm">
               <ChevronRight className="h-5 w-5" />
