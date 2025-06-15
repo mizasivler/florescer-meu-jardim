@@ -18,12 +18,14 @@ const EntryList = ({ entries }: EntryListProps) => {
   };
 
   const getMoodEmoji = (mood: string) => {
-    switch (mood) {
-      case 'esperancosa': return '🌟';
+    // Mapeamento correto baseado nos labels em português
+    switch (mood.toLowerCase()) {
+      case 'esperançosa': return '🌟';
       case 'aflita': return '😰';
       case 'cansada': return '😴';
       case 'irritada': return '😤';
-      case 'sensivel': return '🥺';
+      case 'sensível': return '🥺';
+      case 'sensivel': return '🥺'; // fallback sem acento
       default: return '😊';
     }
   };

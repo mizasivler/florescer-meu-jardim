@@ -29,8 +29,10 @@ const MoodSelector = ({ selectedMood, onMoodSelect }: MoodSelectorProps) => {
             <button
               key={mood.label}
               onClick={() => onMoodSelect(mood.emoji, mood.label)}
-              className={`flex flex-col items-center justify-center py-3 px-2 min-h-[80px] rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-                selectedMood === mood.emoji ? 'ring-2 ring-florescer-copper bg-florescer-copper/10 border-florescer-copper' : 'border-gray-200 hover:border-florescer-copper'
+              className={`flex flex-col items-center justify-center py-3 px-2 min-h-[80px] rounded-2xl transition-all duration-300 hover:scale-105 ${
+                selectedMood === mood.emoji 
+                  ? 'ring-2 ring-florescer-copper bg-florescer-copper/10' 
+                  : 'bg-gray-50 hover:bg-florescer-copper/5'
               }`}
               title={mood.label}
             >
