@@ -1,13 +1,27 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MeditationHeader from '@/components/meditation/MeditationHeader';
 import FeaturedCard from '@/components/meditation/FeaturedCard';
 import CategoryFilter from '@/components/meditation/CategoryFilter';
 import MeditationGrid from '@/components/meditation/MeditationGrid';
 import MeditationPremiumCTA from '@/components/meditation/MeditationPremiumCTA';
+import { useMeditation } from '@/hooks/useMeditation';
+import { useToast } from '@/hooks/use-toast';
 
 const Meditation = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { completeMeditation, getMeditationStats } = useMeditation();
+  const { toast } = useToast();
+  const [stats, setStats] = useState({ totalSessions: 0, totalMinutes: 0, averageRating: 0 });
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    const meditationStats = await getMeditationStats();
+    setStats(meditationStats);
+  };
 
   const categories = [
     { id: 'all', name: 'Todas', icon: '🎯' },
@@ -29,7 +43,8 @@ const Meditation = () => {
       listeners: 1250,
       premium: false,
       instructor: 'Célia Santos',
-      gradient: 'from-blue-400 to-cyan-400'
+      gradient: 'from-blue-400 to-cyan-400',
+      onPlay: () => handleMeditationComplete(1, 'Respiração para Ansiedade', 10)
     },
     {
       id: 2,
@@ -42,7 +57,8 @@ const Meditation = () => {
       listeners: 2100,
       premium: false,
       instructor: 'Dra. Marina',
-      gradient: 'from-purple-400 to-indigo-400'
+      gradient: 'from-purple-400 to-indigo-400',
+      onPlay: () => handleMeditationComplete(2, 'Meditação do Sono Reparador', 20)
     },
     {
       id: 3,
@@ -55,7 +71,8 @@ const Meditation = () => {
       listeners: 980,
       premium: false,
       instructor: 'Célia Santos',
-      gradient: 'from-yellow-400 to-orange-400'
+      gradient: 'from-yellow-400 to-orange-400',
+      onPlay: () => handleMeditationComplete(3, 'Despertar com Gratidão', 8)
     },
     {
       id: 4,
@@ -68,7 +85,8 @@ const Meditation = () => {
       listeners: 1560,
       premium: true,
       instructor: 'Profa. Ana',
-      gradient: 'from-green-400 to-emerald-400'
+      gradient: 'from-green-400 to-emerald-400',
+      onPlay: () => handlePremiumRequired()
     },
     {
       id: 5,
@@ -81,7 +99,8 @@ const Meditation = () => {
       listeners: 756,
       premium: true,
       instructor: 'Célia Santos',
-      gradient: 'from-pink-400 to-purple-400'
+      gradient: 'from-pink-400 to-purple-400',
+      onPlay: () => handlePremiumRequired()
     },
     {
       id: 6,
@@ -94,9 +113,31 @@ const Meditation = () => {
       listeners: 432,
       premium: true,
       instructor: 'Dra. Marina',
-      gradient: 'from-teal-400 to-blue-400'
+      gradient: 'from-teal-400 to-blue-400',
+      onPlay: () => handlePremiumRequired()
     }
   ];
+
+  const handleMeditationComplete = async (id: number, title: string, duration: number) => {
+    const success = await completeMeditation({
+      meditationId: id,
+      title,
+      duration,
+      rating: 5 // Default rating, could be collected from user
+    });
+
+    if (success.error === null) {
+      await loadStats(); // Refresh stats after completion
+    }
+  };
+
+  const handlePremiumRequired = () => {
+    toast({
+      title: "Recurso Premium",
+      description: "Esta meditação está disponível apenas para usuárias Premium. Faça upgrade para acessar!",
+      variant: "destructive"
+    });
+  };
 
   const filteredMeditations = selectedCategory === 'all' 
     ? meditations 
@@ -104,7 +145,7 @@ const Meditation = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pb-20">
-      <MeditationHeader />
+      <MeditationHeader stats={stats} />
       
       <div className="px-6">
         <FeaturedCard />

@@ -3,9 +3,24 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { Tables } from '@/integrations/supabase/types';
 
-type DiaryEntry = Tables<'diary_entries'>;
+export interface DiaryEntry {
+  id: string;
+  title: string;
+  content: string;
+  mood: 'cansada' | 'aflita' | 'sensivel' | 'irritada' | 'esperancosa';
+  date: string;
+  gratitude_items?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewDiaryEntry {
+  title: string;
+  content: string;
+  mood: 'cansada' | 'aflita' | 'sensivel' | 'irritada' | 'esperancosa';
+  gratitude_items?: string[];
+}
 
 export const useDiary = () => {
   const { user } = useAuth();
@@ -15,11 +30,11 @@ export const useDiary = () => {
 
   useEffect(() => {
     if (user) {
-      fetchEntries();
+      loadEntries();
     }
   }, [user]);
 
-  const fetchEntries = async () => {
+  const loadEntries = async () => {
     if (!user) return;
 
     setLoading(true);
@@ -28,63 +43,64 @@ export const useDiary = () => {
         .from('diary_entries')
         .select('*')
         .eq('user_id', user.id)
-        .order('date', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching diary entries:', error);
-        throw error;
+        console.error('Error loading diary entries:', error);
+        toast({
+          title: "Erro ao carregar entradas",
+          description: "Não foi possível carregar suas entradas do diário.",
+          variant: "destructive"
+        });
+        return;
       }
 
       setEntries(data || []);
     } catch (error) {
-      console.error('Error in fetchEntries:', error);
-      toast({
-        title: "Erro ao carregar entradas",
-        description: "Não foi possível carregar suas entradas do diário.",
-        variant: "destructive"
-      });
+      console.error('Error in loadEntries:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const saveEntry = async (title: string, content: string, mood?: string) => {
+  const addEntry = async (entryData: NewDiaryEntry) => {
     if (!user) return { error: 'Usuário não autenticado' };
 
     setLoading(true);
-    console.log('Saving diary entry:', { title, content, mood });
+    console.log('Adding diary entry:', entryData);
 
     try {
       const { data, error } = await supabase
         .from('diary_entries')
         .insert({
           user_id: user.id,
-          title,
-          content,
-          mood: mood as any || null,
+          title: entryData.title,
+          content: entryData.content,
+          mood: entryData.mood,
           date: new Date().toISOString().split('T')[0]
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Error saving diary entry:', error);
+        console.error('Error adding diary entry:', error);
         throw error;
       }
 
+      // Add to local state
       setEntries(prev => [data, ...prev]);
-      
+
       toast({
-        title: "Entrada salva!",
-        description: "Sua reflexão foi salva no diário emocional."
+        title: "Entrada salva! 📖",
+        description: "Sua reflexão foi salva com sucesso."
       });
 
       return { error: null, data };
     } catch (error: any) {
-      console.error('Error in saveEntry:', error);
+      console.error('Error in addEntry:', error);
       toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar a entrada. Tente novamente.",
+        title: "Erro ao salvar entrada",
+        description: "Não foi possível salvar sua entrada. Tente novamente.",
         variant: "destructive"
       });
       return { error: error.message };
@@ -93,19 +109,15 @@ export const useDiary = () => {
     }
   };
 
-  const updateEntry = async (id: string, title: string, content: string, mood?: string) => {
+  const updateEntry = async (entryId: string, updates: Partial<NewDiaryEntry>) => {
     if (!user) return { error: 'Usuário não autenticado' };
 
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('diary_entries')
-        .update({
-          title,
-          content,
-          mood: mood as any || null
-        })
-        .eq('id', id)
+        .update(updates)
+        .eq('id', entryId)
         .eq('user_id', user.id)
         .select()
         .single();
@@ -115,8 +127,9 @@ export const useDiary = () => {
         throw error;
       }
 
+      // Update local state
       setEntries(prev => prev.map(entry => 
-        entry.id === id ? data : entry
+        entry.id === entryId ? { ...entry, ...data } : entry
       ));
 
       toast({
@@ -128,7 +141,7 @@ export const useDiary = () => {
     } catch (error: any) {
       console.error('Error in updateEntry:', error);
       toast({
-        title: "Erro ao atualizar",
+        title: "Erro ao atualizar entrada",
         description: "Não foi possível salvar as alterações.",
         variant: "destructive"
       });
@@ -138,7 +151,7 @@ export const useDiary = () => {
     }
   };
 
-  const deleteEntry = async (id: string) => {
+  const deleteEntry = async (entryId: string) => {
     if (!user) return { error: 'Usuário não autenticado' };
 
     setLoading(true);
@@ -146,7 +159,7 @@ export const useDiary = () => {
       const { error } = await supabase
         .from('diary_entries')
         .delete()
-        .eq('id', id)
+        .eq('id', entryId)
         .eq('user_id', user.id);
 
       if (error) {
@@ -154,10 +167,11 @@ export const useDiary = () => {
         throw error;
       }
 
-      setEntries(prev => prev.filter(entry => entry.id !== id));
+      // Remove from local state
+      setEntries(prev => prev.filter(entry => entry.id !== entryId));
 
       toast({
-        title: "Entrada removida",
+        title: "Entrada excluída",
         description: "A entrada foi removida do seu diário."
       });
 
@@ -165,8 +179,8 @@ export const useDiary = () => {
     } catch (error: any) {
       console.error('Error in deleteEntry:', error);
       toast({
-        title: "Erro ao remover",
-        description: "Não foi possível remover a entrada.",
+        title: "Erro ao excluir entrada",
+        description: "Não foi possível excluir a entrada.",
         variant: "destructive"
       });
       return { error: error.message };
@@ -175,12 +189,39 @@ export const useDiary = () => {
     }
   };
 
+  const getEntriesStats = () => {
+    const totalEntries = entries.length;
+    const thisWeekEntries = entries.filter(entry => {
+      const entryDate = new Date(entry.created_at);
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return entryDate >= oneWeekAgo;
+    }).length;
+
+    const moodCounts = entries.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const mostCommonMood = Object.entries(moodCounts).reduce((a, b) => 
+      moodCounts[a[0]] > moodCounts[b[0]] ? a : b
+    )?.[0] || 'esperancosa';
+
+    return {
+      totalEntries,
+      thisWeekEntries,
+      mostCommonMood,
+      moodCounts
+    };
+  };
+
   return {
     entries,
     loading,
-    saveEntry,
+    addEntry,
     updateEntry,
     deleteEntry,
-    refetch: fetchEntries
+    getEntriesStats,
+    refetch: loadEntries
   };
 };

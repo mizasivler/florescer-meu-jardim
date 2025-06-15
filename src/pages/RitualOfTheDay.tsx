@@ -1,18 +1,20 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, CheckCircle, Clock, Heart, Droplets } from 'lucide-react';
+import { useRituals } from '@/hooks/useRituals';
 
 const RitualOfTheDay = () => {
   const navigate = useNavigate();
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const { completeRitualStep, getTodayRitualProgress, loading } = useRituals();
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
   const ritualSteps = [
     {
-      id: 1,
+      id: 'breathing',
       title: 'Respiração Matinal',
       description: 'Respire profundamente por 3 minutos para começar o dia',
       duration: '3 min',
@@ -21,7 +23,7 @@ const RitualOfTheDay = () => {
       gradient: 'from-blue-400 to-cyan-400'
     },
     {
-      id: 2,
+      id: 'affirmation',
       title: 'Afirmação Positiva',
       description: 'Repita sua afirmação do dia para fortalecer sua autoestima',
       duration: '2 min',
@@ -30,7 +32,7 @@ const RitualOfTheDay = () => {
       gradient: 'from-pink-400 to-purple-400'
     },
     {
-      id: 3,
+      id: 'gratitude',
       title: 'Momento de Gratidão',
       description: 'Reflita sobre 3 coisas pelas quais você é grata hoje',
       duration: '5 min',
@@ -40,11 +42,29 @@ const RitualOfTheDay = () => {
     }
   ];
 
-  const toggleStepCompletion = (stepId: number) => {
+  useEffect(() => {
+    loadTodayProgress();
+  }, []);
+
+  const loadTodayProgress = async () => {
+    const progress = await getTodayRitualProgress();
+    setCompletedSteps(progress.completedSteps);
+  };
+
+  const toggleStepCompletion = async (stepId: string) => {
     if (completedSteps.includes(stepId)) {
+      // Remove from completed steps (for UI feedback)
       setCompletedSteps(completedSteps.filter(id => id !== stepId));
     } else {
-      setCompletedSteps([...completedSteps, stepId]);
+      // Add to completed steps
+      const newCompletedSteps = [...completedSteps, stepId];
+      setCompletedSteps(newCompletedSteps);
+      
+      // Save to database
+      const step = ritualSteps.find(s => s.id === stepId);
+      if (step) {
+        await completeRitualStep(stepId, `${step.title} concluído`);
+      }
     }
   };
 
@@ -141,13 +161,14 @@ const RitualOfTheDay = () => {
                 {/* Action Button */}
                 <Button
                   onClick={() => toggleStepCompletion(step.id)}
+                  disabled={loading}
                   className={`w-full rounded-2xl font-semibold py-4 ${
                     isCompleted
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
                       : `bg-gradient-to-r ${step.gradient} hover:opacity-90`
                   } text-white border-none transition-all duration-300`}
                 >
-                  {isCompleted ? '✓ Concluído' : 'Marcar como Concluído'}
+                  {loading ? 'Salvando...' : isCompleted ? '✓ Concluído' : 'Marcar como Concluído'}
                 </Button>
               </div>
             </Card>

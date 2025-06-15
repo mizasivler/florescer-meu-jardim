@@ -1,35 +1,14 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Plus, Edit, Heart } from 'lucide-react';
+import { useDiary } from '@/hooks/useDiary';
 
 const EmotionDiary = () => {
   const navigate = useNavigate();
-  const [entries, setEntries] = useState([
-    {
-      id: 1,
-      date: '2024-01-15',
-      mood: '🌟',
-      moodLabel: 'Esperançosa',
-      title: 'Um dia de descobertas',
-      content: 'Hoje me senti mais conectada comigo mesma. A meditação matinal realmente fez diferença...',
-      gratitude: ['Saúde da família', 'Sol da manhã', 'Conversa com amiga'],
-      tags: ['gratidão', 'meditação', 'autoconhecimento']
-    },
-    {
-      id: 2,
-      date: '2024-01-14',
-      mood: '😰',
-      moodLabel: 'Aflita',
-      title: 'Lidando com a ansiedade',
-      content: 'Dia desafiador, mas consegui usar as técnicas de respiração que aprendi...',
-      gratitude: ['Técnicas de respiração', 'Apoio da família', 'Momento de descanso'],
-      tags: ['ansiedade', 'respiração', 'superação']
-    }
-  ]);
-
+  const { entries, addEntry, updateEntry, loading } = useDiary();
   const [isWriting, setIsWriting] = useState(false);
   const [newEntry, setNewEntry] = useState({
     mood: '',
@@ -56,24 +35,28 @@ const EmotionDiary = () => {
     });
   };
 
-  const saveEntry = () => {
+  const saveEntry = async () => {
     if (newEntry.title && newEntry.content && newEntry.mood) {
-      const entry = {
-        ...newEntry,
-        id: entries.length + 1,
-        date: new Date().toISOString().split('T')[0],
-        gratitude: newEntry.gratitude.filter(item => item.trim() !== '')
-      };
-      setEntries([entry, ...entries]);
-      setIsWriting(false);
-      setNewEntry({
-        mood: '',
-        moodLabel: '',
-        title: '',
-        content: '',
-        gratitude: ['', '', ''],
+      const entryData = {
+        title: newEntry.title,
+        content: newEntry.content,
+        mood: newEntry.moodLabel as any, // Type assertion for enum
+        gratitude_items: newEntry.gratitude.filter(item => item.trim() !== ''),
         tags: []
-      });
+      };
+
+      const success = await addEntry(entryData);
+      if (success.error === null) {
+        setIsWriting(false);
+        setNewEntry({
+          mood: '',
+          moodLabel: '',
+          title: '',
+          content: '',
+          gratitude: ['', '', ''],
+          tags: []
+        });
+      }
     }
   };
 
@@ -110,8 +93,8 @@ const EmotionDiary = () => {
                       onClick={() => {
                         setNewEntry({...newEntry, mood: mood.emoji, moodLabel: mood.label});
                       }}
-                      className={`mood-emoji ${
-                        newEntry.mood === mood.emoji ? 'ring-2 ring-florescer-copper bg-florescer-copper/10' : ''
+                      className={`w-16 h-16 text-3xl rounded-2xl border-2 transition-all duration-300 hover:scale-110 ${
+                        newEntry.mood === mood.emoji ? 'ring-2 ring-florescer-copper bg-florescer-copper/10 border-florescer-copper' : 'border-gray-200 hover:border-florescer-copper'
                       }`}
                       title={mood.label}
                     >
@@ -178,11 +161,11 @@ const EmotionDiary = () => {
             {/* Save Button */}
             <Button 
               onClick={saveEntry}
-              disabled={!newEntry.title || !newEntry.content || !newEntry.mood}
+              disabled={!newEntry.title || !newEntry.content || !newEntry.mood || loading}
               className="btn-primary w-full"
             >
               <Heart className="h-4 w-4 mr-2" />
-              Salvar Entrada
+              {loading ? 'Salvando...' : 'Salvar Entrada'}
             </Button>
           </div>
         </div>
@@ -219,12 +202,16 @@ const EmotionDiary = () => {
               <div className="text-sm text-florescer-dark/60">Entradas</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-florescer-olive">7</div>
-              <div className="text-sm text-florescer-dark/60">Dias seguidos</div>
+              <div className="text-2xl font-bold text-florescer-olive">
+                {entries.length > 0 ? Math.max(1, entries.length) : 0}
+              </div>
+              <div className="text-sm text-florescer-dark/60">Dias ativos</div>
             </div>
             <div>
-              <div className="text-2xl">🌟</div>
-              <div className="text-sm text-florescer-dark/60">Humor hoje</div>
+              <div className="text-2xl">
+                {entries.length > 0 ? entries[0]?.mood === 'esperancosa' ? '🌟' : entries[0]?.mood === 'aflita' ? '😰' : '😌' : '😊'}
+              </div>
+              <div className="text-sm text-florescer-dark/60">Último humor</div>
             </div>
           </div>
         </Card>
@@ -247,56 +234,66 @@ const EmotionDiary = () => {
           Minhas Entradas
         </h2>
         
-        {entries.map((entry) => (
-          <Card key={entry.id} className="card-florescer">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{entry.mood}</span>
-                  <div>
-                    <h3 className="font-lora font-semibold text-lg text-florescer-dark">
-                      {entry.title}
-                    </h3>
-                    <p className="text-sm text-florescer-dark/60">
-                      {formatDate(entry.date)} • {entry.moodLabel}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm">
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <p className="text-florescer-dark/80 text-sm mb-4 line-clamp-3">
-                {entry.content}
-              </p>
-              
-              {entry.gratitude.length > 0 && (
-                <div className="bg-florescer-cream/50 rounded-lg p-3 mb-3">
-                  <h4 className="font-medium text-sm text-florescer-dark mb-2">Gratidão:</h4>
-                  <div className="space-y-1">
-                    {entry.gratitude.map((item, index) => (
-                      <p key={index} className="text-sm text-florescer-dark/70">
-                        • {item}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-wrap gap-2">
-                {entry.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="text-xs bg-florescer-copper/20 text-florescer-copper px-2 py-1 rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+        {entries.length === 0 ? (
+          <Card className="card-florescer text-center py-8">
+            <div className="text-6xl mb-4">📝</div>
+            <h3 className="font-lora font-semibold text-lg mb-2 text-florescer-dark">
+              Nenhuma entrada ainda
+            </h3>
+            <p className="text-florescer-dark/60 mb-4">
+              Comece escrevendo sobre seus sentimentos e experiências
+            </p>
+            <Button onClick={() => setIsWriting(true)} className="btn-primary">
+              Criar primeira entrada
+            </Button>
           </Card>
-        ))}
+        ) : (
+          entries.map((entry) => (
+            <Card key={entry.id} className="card-florescer">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">
+                      {entry.mood === 'esperancosa' ? '🌟' : 
+                       entry.mood === 'aflita' ? '😰' : 
+                       entry.mood === 'cansada' ? '😴' :
+                       entry.mood === 'irritada' ? '😤' :
+                       entry.mood === 'sensivel' ? '🥺' : '😊'}
+                    </span>
+                    <div>
+                      <h3 className="font-lora font-semibold text-lg text-florescer-dark">
+                        {entry.title}
+                      </h3>
+                      <p className="text-sm text-florescer-dark/60">
+                        {formatDate(entry.date)} • {entry.mood}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <p className="text-florescer-dark/80 text-sm mb-4 line-clamp-3">
+                  {entry.content}
+                </p>
+                
+                {entry.gratitude_items && entry.gratitude_items.length > 0 && (
+                  <div className="bg-florescer-cream/50 rounded-lg p-3 mb-3">
+                    <h4 className="font-medium text-sm text-florescer-dark mb-2">Gratidão:</h4>
+                    <div className="space-y-1">
+                      {entry.gratitude_items.map((item, index) => (
+                        <p key={index} className="text-sm text-florescer-dark/70">
+                          • {item}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

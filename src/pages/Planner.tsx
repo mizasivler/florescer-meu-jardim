@@ -4,25 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Plus, CheckCircle, Clock, Calendar as CalendarIcon } from 'lucide-react';
+import { usePlanner } from '@/hooks/usePlanner';
 
 const Planner = () => {
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Ritual matinal', completed: true, time: '07:00' },
-    { id: 2, title: 'Meditação de 10min', completed: false, time: '14:00' },
-    { id: 3, title: 'Caminhada no parque', completed: false, time: '18:00' },
-    { id: 4, title: 'Diário da emoção', completed: false, time: '20:00' }
-  ]);
+  const { tasks, loading, toggleTask, addTask, getProgress } = usePlanner();
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskTime, setNewTaskTime] = useState('');
 
-  const toggleTask = (taskId: number) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
-  };
-
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const progressPercentage = (completedTasks / tasks.length) * 100;
+  const progress = getProgress();
+  const selectedDate = new Date();
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', { 
@@ -30,6 +22,15 @@ const Planner = () => {
       day: 'numeric', 
       month: 'long' 
     });
+  };
+
+  const handleAddTask = async () => {
+    if (newTaskTitle.trim() && newTaskTime) {
+      await addTask(newTaskTitle.trim(), newTaskTime);
+      setNewTaskTitle('');
+      setNewTaskTime('');
+      setShowAddTask(false);
+    }
   };
 
   return (
@@ -63,14 +64,14 @@ const Planner = () => {
                   {formatDate(selectedDate)}
                 </h3>
                 <p className="text-sm text-florescer-dark/60">
-                  {completedTasks} de {tasks.length} atividades concluídas
+                  {progress.completedTasks} de {progress.totalTasks} atividades concluídas
                 </p>
               </div>
             </div>
             <div className="text-right">
               <div className="text-2xl mb-1">📅</div>
               <div className="text-sm text-florescer-dark/60">
-                {Math.round(progressPercentage)}%
+                {progress.progressPercentage}%
               </div>
             </div>
           </div>
@@ -91,7 +92,9 @@ const Planner = () => {
               ))}
             </div>
             <p className="text-florescer-dark/70 text-sm">
-              Continue assim! Cada pequeno passo conta na sua jornada 🌸
+              {progress.progressPercentage === 100 
+                ? 'Parabéns! Você concluiu todas as atividades hoje! 🌟'
+                : 'Continue assim! Cada pequeno passo conta na sua jornada 🌸'}
             </p>
           </div>
         </Card>
@@ -103,51 +106,107 @@ const Planner = () => {
           <h2 className="font-lora font-semibold text-xl text-florescer-dark">
             Atividades de Hoje
           </h2>
-          <Button size="sm" className="btn-primary">
+          <Button 
+            size="sm" 
+            className="btn-primary"
+            onClick={() => setShowAddTask(!showAddTask)}
+          >
             <Plus className="h-4 w-4 mr-1" />
             Adicionar
           </Button>
         </div>
 
-        <div className="space-y-3">
-          {tasks.map((task) => (
-            <Card 
-              key={task.id}
-              className={`card-florescer transition-all duration-300 ${
-                task.completed ? 'bg-florescer-copper/10 border-florescer-copper' : ''
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => toggleTask(task.id)}
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                    task.completed
-                      ? 'bg-florescer-copper border-florescer-copper'
-                      : 'border-gray-300 hover:border-florescer-copper'
-                  }`}
-                >
-                  {task.completed && (
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  )}
-                </button>
-                
-                <div className="flex-1">
-                  <h3 className={`font-medium ${
-                    task.completed 
-                      ? 'text-florescer-dark/60 line-through' 
-                      : 'text-florescer-dark'
-                  }`}>
-                    {task.title}
-                  </h3>
-                </div>
-                
-                <div className="flex items-center gap-1 text-florescer-dark/60">
-                  <Clock className="h-4 w-4" />
-                  <span className="text-sm">{task.time}</span>
-                </div>
+        {/* Add Task Form */}
+        {showAddTask && (
+          <Card className="card-florescer mb-4">
+            <div className="space-y-3">
+              <h3 className="font-medium text-florescer-dark">Nova Atividade</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="Título da atividade"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  className="p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-florescer-copper focus:border-transparent"
+                />
+                <input
+                  type="time"
+                  value={newTaskTime}
+                  onChange={(e) => setNewTaskTime(e.target.value)}
+                  className="p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-florescer-copper focus:border-transparent"
+                />
               </div>
+              <div className="flex gap-2">
+                <Button onClick={handleAddTask} size="sm" className="btn-primary">
+                  Salvar
+                </Button>
+                <Button 
+                  onClick={() => setShowAddTask(false)} 
+                  variant="outline" 
+                  size="sm"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        <div className="space-y-3">
+          {tasks.length === 0 ? (
+            <Card className="card-florescer text-center py-8">
+              <div className="text-6xl mb-4">📋</div>
+              <h3 className="font-lora font-semibold text-lg mb-2 text-florescer-dark">
+                Nenhuma atividade hoje
+              </h3>
+              <p className="text-florescer-dark/60 mb-4">
+                Adicione suas primeiras atividades para organizar seu dia
+              </p>
+              <Button onClick={() => setShowAddTask(true)} className="btn-primary">
+                Adicionar atividade
+              </Button>
             </Card>
-          ))}
+          ) : (
+            tasks.map((task) => (
+              <Card 
+                key={task.id}
+                className={`card-florescer transition-all duration-300 ${
+                  task.completed ? 'bg-florescer-copper/10 border-florescer-copper' : ''
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => toggleTask(task.id)}
+                    disabled={loading}
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      task.completed
+                        ? 'bg-florescer-copper border-florescer-copper'
+                        : 'border-gray-300 hover:border-florescer-copper'
+                    }`}
+                  >
+                    {task.completed && (
+                      <CheckCircle className="h-4 w-4 text-white" />
+                    )}
+                  </button>
+                  
+                  <div className="flex-1">
+                    <h3 className={`font-medium ${
+                      task.completed 
+                        ? 'text-florescer-dark/60 line-through' 
+                        : 'text-florescer-dark'
+                    }`}>
+                      {task.title}
+                    </h3>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-florescer-dark/60">
+                    <Clock className="h-4 w-4" />
+                    <span className="text-sm">{task.time}</span>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Weekly Overview */}
