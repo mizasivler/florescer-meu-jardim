@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -169,6 +168,12 @@ export const useUserData = () => {
     }
   };
 
+  // Adiciona método para atualizar avatar_url no perfil
+  const saveAvatarUrl = async (avatarUrl: string) => {
+    if (!user) return { error: 'Usuário não autenticado' };
+    return updateProfile({ avatar_url: avatarUrl } as any);
+  };
+
   return {
     profile,
     progress,
@@ -177,6 +182,7 @@ export const useUserData = () => {
     updateProfile,
     updateProgress,
     saveDailyMood,
+    saveAvatarUrl,
     refetch: fetchUserData
   };
 };

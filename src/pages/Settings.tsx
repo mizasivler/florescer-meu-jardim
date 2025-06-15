@@ -1,15 +1,26 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, User, Bell, Shield, Heart, LogOut, ChevronRight } from 'lucide-react';
+import { useUserData } from "@/hooks/useUserData";
+import ProfileAvatarUpload from "@/components/ProfileAvatarUpload";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const { profile, saveAvatarUrl, refetch } = useUserData();
   const [notifications, setNotifications] = useState(true);
-  const [userName] = useState('Luciana Silva');
-  const [userEmail] = useState('luciana@email.com');
+
+  // Mostra dados fictícios só se o user não estiver logado ainda
+  const userName = profile?.name || "Usuário";
+  const userEmail = profile?.email || "seu@email.com";
+  const avatarUrl = profile?.avatar_url || undefined;
+
+  // Handler do upload de avatar
+  const handleAvatarUploaded = async (publicUrl: string) => {
+    await saveAvatarUrl(publicUrl);
+    await refetch(); // Atualiza perfil e recarrega avatar
+  };
 
   const settingsOptions = [
     {
@@ -60,15 +71,17 @@ const Settings = () => {
         {/* Profile Card */}
         <Card className="card-florescer mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-florescer-copper rounded-full flex items-center justify-center">
-              <User className="h-8 w-8 text-white" />
-            </div>
+            <ProfileAvatarUpload
+              userId={profile?.id || "anon"}
+              currentAvatarUrl={avatarUrl}
+              onUploaded={handleAvatarUploaded}
+            />
             <div className="flex-1">
               <h3 className="font-lora font-semibold text-lg text-florescer-dark">
                 {userName}
               </h3>
               <p className="text-florescer-dark/60 text-sm">{userEmail}</p>
-              <p className="text-florescer-copper text-sm mt-1">Dia 5 da jornada • Premium</p>
+              <p className="text-florescer-copper text-sm mt-1">Dia {profile?.current_day || 1} da jornada • Premium</p>
             </div>
             <Button variant="ghost" size="sm">
               <ChevronRight className="h-5 w-5" />
