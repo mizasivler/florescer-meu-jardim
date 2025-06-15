@@ -32,14 +32,23 @@ const Navigation = () => {
                   : 'hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 relative ${
                 isActive 
-                  ? `bg-gradient-to-r ${item.gradient} shadow-lg animate-gentle-pulse` 
+                  ? 'shadow-lg animate-gentle-pulse' 
                   : 'bg-gray-100 hover:bg-gray-200 hover:shadow-sm'
               }`}>
-                <item.icon className={`h-5 w-5 transition-all duration-500 ${
-                  isActive ? 'text-white animate-subtle-pulse' : 'text-gray-600'
-                }`} />
+                {isActive && (
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${item.gradient} opacity-20 backdrop-blur-sm border border-white/30`} />
+                )}
+                <div className={`relative z-10 w-8 h-8 rounded-xl flex items-center justify-center ${
+                  isActive 
+                    ? `bg-gradient-to-r ${item.gradient}` 
+                    : ''
+                }`}>
+                  <item.icon className={`h-5 w-5 transition-all duration-500 ${
+                    isActive ? 'text-white animate-subtle-pulse' : 'text-gray-600'
+                  }`} />
+                </div>
               </div>
               <span className={`text-xs font-medium transition-all duration-500 ${
                 isActive ? 'text-gray-800 font-bold' : 'text-gray-500'
