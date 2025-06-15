@@ -22,6 +22,23 @@ export interface NewDiaryEntry {
   gratitude_items?: string[];
 }
 
+// Mapping between frontend Portuguese moods and database English moods
+const moodMapping = {
+  'cansada': 'tired',
+  'aflita': 'anxious', 
+  'sensivel': 'sensitive',
+  'irritada': 'irritated',
+  'esperancosa': 'hopeful'
+} as const;
+
+const reverseMoodMapping = {
+  'tired': 'cansada',
+  'anxious': 'aflita',
+  'sensitive': 'sensivel', 
+  'irritated': 'irritada',
+  'hopeful': 'esperancosa'
+} as const;
+
 export const useDiary = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -55,7 +72,15 @@ export const useDiary = () => {
         return;
       }
 
-      setEntries(data || []);
+      // Convert database entries to frontend format
+      const convertedEntries: DiaryEntry[] = (data || []).map(entry => ({
+        ...entry,
+        mood: entry.mood ? reverseMoodMapping[entry.mood as keyof typeof reverseMoodMapping] : 'esperancosa',
+        created_at: entry.created_at || '',
+        updated_at: entry.updated_at || ''
+      }));
+
+      setEntries(convertedEntries);
     } catch (error) {
       console.error('Error in loadEntries:', error);
     } finally {
@@ -76,7 +101,7 @@ export const useDiary = () => {
           user_id: user.id,
           title: entryData.title,
           content: entryData.content,
-          mood: entryData.mood,
+          mood: moodMapping[entryData.mood],
           date: new Date().toISOString().split('T')[0]
         })
         .select()
@@ -87,15 +112,22 @@ export const useDiary = () => {
         throw error;
       }
 
-      // Add to local state
-      setEntries(prev => [data, ...prev]);
+      // Convert database entry to frontend format and add to local state
+      const convertedEntry: DiaryEntry = {
+        ...data,
+        mood: reverseMoodMapping[data.mood as keyof typeof reverseMoodMapping],
+        created_at: data.created_at || '',
+        updated_at: data.updated_at || ''
+      };
+
+      setEntries(prev => [convertedEntry, ...prev]);
 
       toast({
         title: "Entrada salva! 📖",
         description: "Sua reflexão foi salva com sucesso."
       });
 
-      return { error: null, data };
+      return { error: null, data: convertedEntry };
     } catch (error: any) {
       console.error('Error in addEntry:', error);
       toast({
@@ -114,9 +146,15 @@ export const useDiary = () => {
 
     setLoading(true);
     try {
+      // Convert mood to database format if present
+      const dbUpdates = {
+        ...updates,
+        ...(updates.mood && { mood: moodMapping[updates.mood] })
+      };
+
       const { data, error } = await supabase
         .from('diary_entries')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', entryId)
         .eq('user_id', user.id)
         .select()
@@ -127,9 +165,16 @@ export const useDiary = () => {
         throw error;
       }
 
-      // Update local state
+      // Convert database entry to frontend format and update local state
+      const convertedEntry: DiaryEntry = {
+        ...data,
+        mood: reverseMoodMapping[data.mood as keyof typeof reverseMoodMapping],
+        created_at: data.created_at || '',
+        updated_at: data.updated_at || ''
+      };
+
       setEntries(prev => prev.map(entry => 
-        entry.id === entryId ? { ...entry, ...data } : entry
+        entry.id === entryId ? convertedEntry : entry
       ));
 
       toast({
@@ -137,7 +182,7 @@ export const useDiary = () => {
         description: "Suas alterações foram salvas."
       });
 
-      return { error: null, data };
+      return { error: null, data: convertedEntry };
     } catch (error: any) {
       console.error('Error in updateEntry:', error);
       toast({
