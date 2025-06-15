@@ -9,7 +9,7 @@ export const moodMapping = {
 } as const;
 
 export const reverseMoodMapping = {
-  'tired': 'sensível',
+  'tired': 'cansada',
   'anxious': 'aflita',
   'sensitive': 'sensível', 
   'irritated': 'irritada',

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -22,15 +21,29 @@ const EmotionDiary = () => {
     tags: []
   });
 
+  // Mapping from emoji to mood key for consistent saving
+  const emojiToMoodMap: Record<string, string> = {
+    '😴': 'cansada',
+    '😰': 'aflita', 
+    '🥺': 'sensível',
+    '😤': 'irritada',
+    '🌟': 'esperançosa'
+  };
+
   const saveEntry = async () => {
     if (newEntry.title && newEntry.content && newEntry.mood) {
+      // Use the emoji to get the correct mood key
+      const moodKey = emojiToMoodMap[newEntry.mood];
+      
       const entryData = {
         title: newEntry.title,
         content: newEntry.content,
-        mood: newEntry.moodLabel as any,
+        mood: moodKey as any,
         gratitude_items: newEntry.gratitude.filter(item => item.trim() !== ''),
         tags: []
       };
+
+      console.log('Saving entry with mood:', moodKey);
 
       const success = await addEntry(entryData);
       if (success.error === null) {
