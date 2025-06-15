@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { DiaryEntry, NewDiaryEntry } from '@/types/diary';
 import { convertToFrontendMood, convertToDatabaseMood } from '@/utils/moodMapping';
@@ -6,6 +7,12 @@ export interface DiaryOperationResult<T = any> {
   error: string | null;
   data?: T;
 }
+
+const convertGratitudeItems = (items: any): string[] => {
+  if (!items) return [];
+  if (Array.isArray(items)) return items.filter(item => typeof item === 'string');
+  return [];
+};
 
 export const diaryOperations = {
   async loadEntries(userId: string): Promise<DiaryOperationResult<DiaryEntry[]>> {
@@ -33,6 +40,7 @@ export const diaryOperations = {
         return {
           ...entry,
           mood: convertedMood,
+          gratitude_items: convertGratitudeItems(entry.gratitude_items),
           created_at: entry.created_at || '',
           updated_at: entry.updated_at || ''
         };
@@ -84,6 +92,7 @@ export const diaryOperations = {
       const convertedEntry: DiaryEntry = {
         ...data,
         mood: convertToFrontendMood(data.mood),
+        gratitude_items: convertGratitudeItems(data.gratitude_items),
         created_at: data.created_at || '',
         updated_at: data.updated_at || ''
       };
@@ -127,6 +136,7 @@ export const diaryOperations = {
       const convertedEntry: DiaryEntry = {
         ...data,
         mood: convertToFrontendMood(data.mood),
+        gratitude_items: convertGratitudeItems(data.gratitude_items),
         created_at: data.created_at || '',
         updated_at: data.updated_at || ''
       };
