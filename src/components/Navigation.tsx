@@ -11,7 +11,7 @@ const Navigation = () => {
     { path: '/', icon: Home, label: 'Início', gradient: 'from-purple-400 to-pink-400' },
     { path: '/ritual', icon: Heart, label: 'Ritual', gradient: 'from-pink-400 to-purple-400' },
     { path: '/meditation', icon: Headphones, label: 'Meditação', gradient: 'from-blue-400 to-cyan-400' },
-    { path: '/forest', icon: TreePine, label: 'Floresta', gradient: 'from-green-400 to-emerald-400' },
+    { path: '/forest', icon: TreePine, label: 'Jardim', gradient: 'from-green-400 to-emerald-400' },
     { path: '/settings', icon: Settings, label: 'Config', gradient: 'from-gray-400 to-gray-500' },
   ];
 

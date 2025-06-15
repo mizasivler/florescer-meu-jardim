@@ -4,12 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-const MyForest = () => {
+const MyGarden = () => {
   const [completedDays, setCompletedDays] = useState(5);
   const [achievements, setAchievements] = useState([
     { id: 1, name: 'Primeira Flor', icon: '🌱', unlocked: true, day: 1 },
     { id: 2, name: 'Jardim com 7 flores', icon: '🌷', unlocked: false, day: 7 },
-    { id: 3, name: 'Floresta Completa', icon: '🌸', unlocked: false, day: 21 }
+    { id: 3, name: 'Jardim Completo', icon: '🌸', unlocked: false, day: 21 }
   ]);
 
   const renderFlowerGarden = () => {
@@ -51,7 +51,7 @@ const MyForest = () => {
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
           <h1 className="font-lora font-bold text-3xl mb-2 text-florescer-dark">
-            Minha Floresta
+            Meu Jardim
           </h1>
           <p className="text-florescer-dark/70">
             Cada ritual concluído faz uma nova flor crescer
@@ -66,7 +66,7 @@ const MyForest = () => {
               {completedDays} de 21 flores
             </h3>
             <p className="text-florescer-dark/70">
-              {Math.round((completedDays / 21) * 100)}% da sua floresta criada
+              {Math.round((completedDays / 21) * 100)}% do seu jardim criado
             </p>
           </div>
         </Card>
@@ -139,4 +139,4 @@ const MyForest = () => {
   );
 };
 
-export default MyForest;
+export default MyGarden;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
@@ -9,7 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import OnboardingFlow from "@/components/OnboardingFlow";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import MyForest from "@/components/MyForest";
+import MyGarden from "@/components/MyGarden";
 import EmergencyMeditation from "@/components/EmergencyMeditation";
 import RitualOfTheDay from "@/pages/RitualOfTheDay";
 import Meditation from "@/pages/Meditation";
@@ -65,7 +64,7 @@ const AppContent = () => {
         <Route path="/meditation" element={<Meditation />} />
         <Route path="/planner" element={<Planner />} />
         <Route path="/diary" element={<EmotionDiary />} />
-        <Route path="/forest" element={<MyForest />} />
+        <Route path="/forest" element={<MyGarden />} />
         <Route path="/emergency" element={<EmergencyMeditation />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
