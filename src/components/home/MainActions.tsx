@@ -85,117 +85,102 @@ const MainActions = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-0 sm:px-3 md:px-0">
+    <div className="px-6 space-y-4">
       {/* Main Actions */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-4"
-      >
-        {actions.map((action, index) => (
-          <Card 
-            key={index}
-            className={`
-              bg-gradient-to-br ${action.bgGradient}
-              rounded-4xl p-6 shadow-card border-0 cursor-pointer 
-              hover:shadow-glow transition-all duration-300 hover:scale-105 group
-              flex flex-col justify-between min-h-[260px]
-            `}
-            onClick={() => navigate(action.path)}
-          >
-            <div className="space-y-4 flex-1 flex flex-col justify-between">
-              {/* Header */}
-              <div>
-                <div className="flex items-center gap-4">
-                  <div className={`
-                    w-16 h-16 bg-gradient-to-r ${action.gradient}
-                    rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform
-                  `}>
-                    <action.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-800 mb-1">{action.title}</h3>
-                    <p className="text-gray-600">{action.description}</p>
-                  </div>
-                </div>
-                <div className="text-4xl group-hover:scale-110 transition-transform duration-300 mt-3 text-right">
-                  {action.emoji}
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between bg-white/60 rounded-2xl p-4 backdrop-blur-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700">{action.stats.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700">{action.stats.completed}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500" />
-                      <span className="text-sm font-medium text-gray-700">{action.stats.rating}</span>
-                    </div>
-                  </div>
-                  {action.highlight && (
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-sm">
-                      {action.highlight}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Emergency Button */}
-      <div className="mt-4">
+      {actions.map((action, index) => (
         <Card 
-          className="bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-4xl p-6 shadow-glow cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border-0"
-          onClick={() => navigate(emergencyAction.path)}
+          key={index}
+          className={`bg-gradient-to-br ${action.bgGradient} rounded-4xl p-6 shadow-card border-0 cursor-pointer hover:shadow-glow transition-all duration-300 hover:scale-105 group`}
+          onClick={() => navigate(action.path)}
         >
           <div className="space-y-4">
+            {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <emergencyAction.icon className="h-8 w-8 text-white" />
+                <div className={`w-16 h-16 bg-gradient-to-r ${action.gradient} rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  <action.icon className="h-8 w-8 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-1">{emergencyAction.title}</h3>
-                  <p className="text-red-100">{emergencyAction.description}</p>
+                  <h3 className="text-xl font-bold text-gray-800 mb-1">{action.title}</h3>
+                  <p className="text-gray-600">{action.description}</p>
                 </div>
               </div>
-              <div className="text-4xl opacity-80 group-hover:scale-110 transition-transform duration-300">
-                {emergencyAction.emoji}
+              <div className="text-4xl group-hover:scale-110 transition-transform duration-300">
+                {action.emoji}
               </div>
             </div>
 
-            {/* Emergency Stats */}
-            <div className="flex flex-col md:flex-row items-center justify-between bg-white/10 rounded-2xl p-4 backdrop-blur-sm gap-4">
-              <div className="flex flex-1 items-center gap-6 justify-center md:justify-start">
-                <div className="text-center">
-                  <div className="text-lg font-bold">{emergencyAction.stats.available}</div>
-                  <div className="text-red-100 text-xs">Disponíveis</div>
+            {/* Stats */}
+            <div className="flex items-center justify-between bg-white/60 rounded-2xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">{action.stats.duration}</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold">{emergencyAction.stats.avgTime}</div>
-                  <div className="text-red-100 text-xs">Duração</div>
+                <div className="flex items-center gap-1">
+                  <Users className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">{action.stats.completed}</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold">{emergencyAction.stats.usage}</div>
-                  <div className="text-red-100 text-xs">Acesso</div>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  <span className="text-sm font-medium text-gray-700">{action.stats.rating}</span>
                 </div>
               </div>
               
-              <Button className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm rounded-2xl font-semibold px-6 mt-2 md:mt-0">
-                Acessar Agora
-              </Button>
+              {action.highlight && (
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-sm">
+                  {action.highlight}
+                </div>
+              )}
             </div>
           </div>
         </Card>
-      </div>
+      ))}
+
+      {/* Emergency Button */}
+      <Card 
+        className="bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-4xl p-6 shadow-glow cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border-0"
+        onClick={() => navigate(emergencyAction.path)}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <emergencyAction.icon className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-1">{emergencyAction.title}</h3>
+                <p className="text-red-100">{emergencyAction.description}</p>
+              </div>
+            </div>
+            <div className="text-4xl opacity-80 group-hover:scale-110 transition-transform duration-300">
+              {emergencyAction.emoji}
+            </div>
+          </div>
+
+          {/* Emergency Stats */}
+          <div className="flex items-center justify-between bg-white/10 rounded-2xl p-4 backdrop-blur-sm">
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-lg font-bold">{emergencyAction.stats.available}</div>
+                <div className="text-red-100 text-xs">Disponíveis</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold">{emergencyAction.stats.avgTime}</div>
+                <div className="text-red-100 text-xs">Duração</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold">{emergencyAction.stats.usage}</div>
+                <div className="text-red-100 text-xs">Acesso</div>
+              </div>
+            </div>
+            
+            <Button className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm rounded-2xl font-semibold px-6">
+              Acessar Agora
+            </Button>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };
