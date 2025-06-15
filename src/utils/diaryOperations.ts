@@ -1,26 +1,53 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { DiaryEntry, NewDiaryEntry } from '@/types/diary';
 import { convertToFrontendMood, convertToDatabaseMood } from '@/utils/moodMapping';
 
-export const useDiaryOperations = (user: any) => {
-  const { toast } = useToast();
+export interface DiaryOperationResult<T = any> {
+  error: string | null;
+  data?: T;
+}
 
-  const addEntry = async (entryData: NewDiaryEntry) => {
-    if (!user) return { error: 'Usuário não autenticado' };
+export const diaryOperations = {
+  async loadEntries(userId: string): Promise<DiaryOperationResult<DiaryEntry[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
-    console.log('Adding diary entry:', entryData);
+      if (error) {
+        console.error('Error loading diary entries:', error);
+        return { error: 'Não foi possível carregar suas entradas do diário.' };
+      }
 
+      // Convert database entries to frontend format
+      const convertedEntries: DiaryEntry[] = (data || []).map(entry => ({
+        ...entry,
+        mood: convertToFrontendMood(entry.mood),
+        created_at: entry.created_at || '',
+        updated_at: entry.updated_at || ''
+      }));
+
+      return { error: null, data: convertedEntries };
+    } catch (error) {
+      console.error('Error in loadEntries:', error);
+      return { error: 'Erro ao carregar entradas' };
+    }
+  },
+
+  async addEntry(userId: string, entryData: NewDiaryEntry): Promise<DiaryOperationResult<DiaryEntry>> {
     try {
       const { data, error } = await supabase
         .from('diary_entries')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           title: entryData.title,
           content: entryData.content,
           mood: convertToDatabaseMood(entryData.mood),
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0],
+          gratitude_items: entryData.gratitude_items
         })
         .select()
         .single();
@@ -38,26 +65,14 @@ export const useDiaryOperations = (user: any) => {
         updated_at: data.updated_at || ''
       };
 
-      toast({
-        title: "Entrada salva! 📖",
-        description: "Sua reflexão foi salva com sucesso."
-      });
-
       return { error: null, data: convertedEntry };
     } catch (error: any) {
       console.error('Error in addEntry:', error);
-      toast({
-        title: "Erro ao salvar entrada",
-        description: "Não foi possível salvar sua entrada. Tente novamente.",
-        variant: "destructive"
-      });
-      return { error: error.message };
+      return { error: 'Não foi possível salvar sua entrada. Tente novamente.' };
     }
-  };
+  },
 
-  const updateEntry = async (entryId: string, updates: Partial<NewDiaryEntry>) => {
-    if (!user) return { error: 'Usuário não autenticado' };
-
+  async updateEntry(userId: string, entryId: string, updates: Partial<NewDiaryEntry>): Promise<DiaryOperationResult<DiaryEntry>> {
     try {
       // Convert mood to database format if present
       const dbUpdates = {
@@ -69,7 +84,7 @@ export const useDiaryOperations = (user: any) => {
         .from('diary_entries')
         .update(dbUpdates)
         .eq('id', entryId)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .select()
         .single();
 
@@ -86,58 +101,30 @@ export const useDiaryOperations = (user: any) => {
         updated_at: data.updated_at || ''
       };
 
-      toast({
-        title: "Entrada atualizada!",
-        description: "Suas alterações foram salvas."
-      });
-
       return { error: null, data: convertedEntry };
     } catch (error: any) {
       console.error('Error in updateEntry:', error);
-      toast({
-        title: "Erro ao atualizar entrada",
-        description: "Não foi possível salvar as alterações.",
-        variant: "destructive"
-      });
-      return { error: error.message };
+      return { error: 'Não foi possível salvar as alterações.' };
     }
-  };
+  },
 
-  const deleteEntry = async (entryId: string) => {
-    if (!user) return { error: 'Usuário não autenticado' };
-
+  async deleteEntry(userId: string, entryId: string): Promise<DiaryOperationResult<void>> {
     try {
       const { error } = await supabase
         .from('diary_entries')
         .delete()
         .eq('id', entryId)
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (error) {
         console.error('Error deleting diary entry:', error);
         throw error;
       }
 
-      toast({
-        title: "Entrada excluída",
-        description: "A entrada foi removida do seu diário."
-      });
-
       return { error: null };
     } catch (error: any) {
       console.error('Error in deleteEntry:', error);
-      toast({
-        title: "Erro ao excluir entrada",
-        description: "Não foi possível excluir a entrada.",
-        variant: "destructive"
-      });
-      return { error: error.message };
+      return { error: 'Não foi possível excluir a entrada.' };
     }
-  };
-
-  return {
-    addEntry,
-    updateEntry,
-    deleteEntry
-  };
+  }
 };
