@@ -17,7 +17,7 @@ export const calculateDiaryStats = (entries: DiaryEntry[]): DiaryStats => {
 
   const mostCommonMood = Object.entries(moodCounts).reduce((a, b) => 
     moodCounts[a[0]] > moodCounts[b[0]] ? a : b
-  )?.[0] || 'esperancosa';
+  )?.[0] || 'esperançosa'; // Corrigido: era 'esperancosa'
 
   return {
     totalEntries,

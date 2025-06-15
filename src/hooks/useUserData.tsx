@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { errorLogger } from '@/utils/errorLogger';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Profile = Tables<'profiles'>;
 type UserProgress = Tables<'user_progress'>;
-type DailyMood = Tables<'daily_moods'>;
 
 export const useUserData = () => {
   const { user } = useAuth();
@@ -30,6 +30,8 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
+      setLoading(true);
+
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -39,6 +41,7 @@ export const useUserData = () => {
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
+        errorLogger.log(profileError, 'fetchProfile', user.id);
       } else {
         setProfile(profileData);
       }
@@ -52,6 +55,7 @@ export const useUserData = () => {
 
       if (progressError) {
         console.error('Error fetching progress:', progressError);
+        errorLogger.log(progressError, 'fetchProgress', user.id);
       } else {
         setProgress(progressData);
       }
@@ -67,48 +71,66 @@ export const useUserData = () => {
 
       if (moodError) {
         console.error('Error fetching today mood:', moodError);
+        errorLogger.log(moodError, 'fetchTodayMood', user.id);
       } else {
         setTodayMood(moodData?.mood || null);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      errorLogger.log(error as Error, 'fetchUserData', user.id);
     } finally {
       setLoading(false);
     }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return;
+    if (!user) return { error: 'Usuário não autenticado' };
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
 
-    if (error) {
-      console.error('Error updating profile:', error);
-      return { error };
+      if (error) {
+        console.error('Error updating profile:', error);
+        errorLogger.log(error, 'updateProfile', user.id);
+        return { error: 'Erro ao atualizar perfil' };
+      }
+
+      await fetchUserData();
+      return { error: null };
+    } catch (error) {
+      const errorMessage = 'Erro inesperado ao atualizar perfil';
+      console.error(errorMessage, error);
+      errorLogger.log(error as Error, 'updateProfile', user.id);
+      return { error: errorMessage };
     }
-
-    await fetchUserData();
-    return { error: null };
   };
 
   const updateProgress = async (updates: Partial<UserProgress>) => {
-    if (!user) return;
+    if (!user) return { error: 'Usuário não autenticado' };
 
-    const { error } = await supabase
-      .from('user_progress')
-      .update(updates)
-      .eq('user_id', user.id);
+    try {
+      const { error } = await supabase
+        .from('user_progress')
+        .update(updates)
+        .eq('user_id', user.id);
 
-    if (error) {
-      console.error('Error updating progress:', error);
-      return { error };
+      if (error) {
+        console.error('Error updating progress:', error);
+        errorLogger.log(error, 'updateProgress', user.id);
+        return { error: 'Erro ao atualizar progresso' };
+      }
+
+      await fetchUserData();
+      return { error: null };
+    } catch (error) {
+      const errorMessage = 'Erro inesperado ao atualizar progresso';
+      console.error(errorMessage, error);
+      errorLogger.log(error as Error, 'updateProgress', user.id);
+      return { error: errorMessage };
     }
-
-    await fetchUserData();
-    return { error: null };
   };
 
   const saveDailyMood = async (mood: string) => {
@@ -133,7 +155,8 @@ export const useUserData = () => {
 
       if (error) {
         console.error('Error saving mood:', error);
-        return { error: error.message };
+        errorLogger.log(error, 'saveDailyMood', user.id);
+        return { error: 'Erro ao salvar humor do dia' };
       }
 
       console.log('Mood saved successfully:', data);
@@ -141,7 +164,8 @@ export const useUserData = () => {
       return { error: null };
     } catch (error: any) {
       console.error('Error in saveDailyMood:', error);
-      return { error: error.message };
+      errorLogger.log(error, 'saveDailyMood', user.id);
+      return { error: 'Erro inesperado ao salvar humor' };
     }
   };
 
