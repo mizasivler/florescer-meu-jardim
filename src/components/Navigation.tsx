@@ -26,28 +26,28 @@ const Navigation = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-2 px-3 py-4 h-auto rounded-2xl transition-all duration-300 ${
+              className={`flex flex-col items-center gap-2 px-3 py-4 h-auto rounded-2xl transition-all duration-500 ${
                 isActive 
-                  ? 'scale-110' 
-                  : 'hover:scale-105'
+                  ? 'scale-105' 
+                  : 'hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${
                 isActive 
-                  ? `bg-gradient-to-r ${item.gradient} shadow-lg` 
-                  : 'bg-gray-100 hover:bg-gray-200'
+                  ? `bg-gradient-to-r ${item.gradient} shadow-lg animate-gentle-pulse` 
+                  : 'bg-gray-100 hover:bg-gray-200 hover:shadow-sm'
               }`}>
-                <item.icon className={`h-5 w-5 transition-all duration-300 ${
-                  isActive ? 'text-white' : 'text-gray-600'
+                <item.icon className={`h-5 w-5 transition-all duration-500 ${
+                  isActive ? 'text-white animate-subtle-pulse' : 'text-gray-600'
                 }`} />
               </div>
-              <span className={`text-xs font-medium transition-all duration-300 ${
+              <span className={`text-xs font-medium transition-all duration-500 ${
                 isActive ? 'text-gray-800 font-bold' : 'text-gray-500'
               }`}>
                 {item.label}
               </span>
               {isActive && (
-                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="w-1 h-1 bg-gray-400 rounded-full animate-gentle-pulse" />
               )}
             </Button>
           );
