@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,9 +13,17 @@ interface HeaderProps {
 
 const Header = ({ profile }: HeaderProps) => {
   const navigate = useNavigate();
-  const { saveDailyMood } = useUserData();
+  const { saveDailyMood, todayMood } = useUserData();
   const { toast } = useToast();
   const [currentMood, setCurrentMood] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Update current mood when todayMood changes
+  useEffect(() => {
+    if (todayMood) {
+      setCurrentMood(todayMood);
+    }
+  }, [todayMood]);
 
   const moodOptions = [
     { emoji: '😴', label: 'Cansada', value: 'tired', color: 'from-blue-400 to-blue-500' },
@@ -33,21 +41,29 @@ const Header = ({ profile }: HeaderProps) => {
   };
 
   const handleMoodSelect = async (mood: string) => {
-    setCurrentMood(mood);
+    if (isLoading || currentMood === mood) return;
+    
+    setIsLoading(true);
+    console.log('Selecting mood:', mood);
+    
     const { error } = await saveDailyMood(mood);
     
     if (error) {
+      console.error('Error saving mood:', error);
       toast({
         title: "Erro ao salvar humor",
-        description: "Tente novamente em alguns instantes",
+        description: error || "Tente novamente em alguns instantes",
         variant: "destructive"
       });
     } else {
+      setCurrentMood(mood);
       toast({
-        title: "Humor registrado!",
+        title: "Humor registrado! ✨",
         description: "Obrigada por compartilhar como se sente hoje"
       });
     }
+    
+    setIsLoading(false);
   };
 
   // Mock data for demonstration - these would come from user data
@@ -127,11 +143,12 @@ const Header = ({ profile }: HeaderProps) => {
             <button
               key={mood.value}
               onClick={() => handleMoodSelect(mood.value)}
+              disabled={isLoading}
               className={`flex-1 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center py-4 px-2 ${
                 currentMood === mood.value 
                   ? `bg-gradient-to-r ${mood.color} shadow-lg scale-105 border-2 border-white` 
                   : 'bg-white/80 hover:bg-white border border-gray-100 hover:scale-105 shadow-sm hover:shadow-md'
-              }`}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               title={mood.label}
             >
               <span className={`text-2xl mb-2 transition-all duration-300 ${
@@ -147,6 +164,14 @@ const Header = ({ profile }: HeaderProps) => {
             </button>
           ))}
         </div>
+
+        {currentMood && (
+          <div className="mt-4 text-center">
+            <span className="text-sm text-gray-600">
+              Humor salvo: {moodOptions.find(m => m.value === currentMood)?.label}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

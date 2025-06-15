@@ -6,11 +6,13 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type Profile = Tables<'profiles'>;
 type UserProgress = Tables<'user_progress'>;
+type DailyMood = Tables<'daily_moods'>;
 
 export const useUserData = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [todayMood, setTodayMood] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +21,7 @@ export const useUserData = () => {
     } else {
       setProfile(null);
       setProgress(null);
+      setTodayMood(null);
       setLoading(false);
     }
   }, [user]);
@@ -51,6 +54,21 @@ export const useUserData = () => {
         console.error('Error fetching progress:', progressError);
       } else {
         setProgress(progressData);
+      }
+
+      // Fetch today's mood
+      const today = new Date().toISOString().split('T')[0];
+      const { data: moodData, error: moodError } = await supabase
+        .from('daily_moods')
+        .select('mood')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+
+      if (moodError) {
+        console.error('Error fetching today mood:', moodError);
+      } else {
+        setTodayMood(moodData?.mood || null);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -94,27 +112,43 @@ export const useUserData = () => {
   };
 
   const saveDailyMood = async (mood: string) => {
-    if (!user) return;
+    if (!user) return { error: 'Usuário não autenticado' };
 
-    const { error } = await supabase
-      .from('daily_moods')
-      .upsert({
-        user_id: user.id,
-        mood: mood as any,
-        date: new Date().toISOString().split('T')[0]
-      });
+    console.log('Saving mood:', mood, 'for user:', user.id);
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data, error } = await supabase
+        .from('daily_moods')
+        .upsert({
+          user_id: user.id,
+          mood: mood as any,
+          date: today
+        }, {
+          onConflict: 'user_id,date'
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error saving mood:', error);
-      return { error };
+      if (error) {
+        console.error('Error saving mood:', error);
+        return { error: error.message };
+      }
+
+      console.log('Mood saved successfully:', data);
+      setTodayMood(mood);
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error in saveDailyMood:', error);
+      return { error: error.message };
     }
-
-    return { error: null };
   };
 
   return {
     profile,
     progress,
+    todayMood,
     loading,
     updateProfile,
     updateProgress,
