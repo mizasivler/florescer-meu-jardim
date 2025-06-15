@@ -26,7 +26,7 @@ const Navigation = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-2 px-3 py-4 h-auto rounded-2xl transition-all duration-500 ${
+              className={`flex flex-col items-center gap-2 px-3 py-4 h-auto rounded-2xl transition-all duration-500 hover:bg-gray-50 hover:text-gray-700 ${
                 isActive 
                   ? 'scale-105' 
                   : 'hover:shadow-sm hover:-translate-y-0.5'
