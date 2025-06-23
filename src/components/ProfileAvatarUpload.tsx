@@ -19,7 +19,7 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
   const { toast } = useToast();
 
   // Enhanced security: File validation with detailed checks
-  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+  const validateFile = async (file: File): Promise<{ isValid: boolean; error?: string }> => {
     // Check file type (whitelist approach)
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
@@ -48,7 +48,7 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
         resolve({ isValid: false, error: "Arquivo de imagem inválido ou corrompido" });
       };
       img.src = URL.createObjectURL(file);
-    }) as Promise<{ isValid: boolean; error?: string }>;
+    });
   };
 
   // Preview image before upload with enhanced validation
@@ -58,19 +58,11 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
     
     if (!file) return;
 
-    // Basic validation first
-    const basicValidation = validateFile(file);
-    if (!basicValidation.isValid) {
-      setErrorMessage(basicValidation.error!);
-      toast({ title: "Arquivo inválido", description: basicValidation.error!, variant: "destructive" });
-      return;
-    }
-
-    // Advanced validation (dimensions)
-    const advancedValidation = await validateFile(file);
-    if (!advancedValidation.isValid) {
-      setErrorMessage(advancedValidation.error!);
-      toast({ title: "Arquivo inválido", description: advancedValidation.error!, variant: "destructive" });
+    // Complete validation (now properly awaited)
+    const validation = await validateFile(file);
+    if (!validation.isValid) {
+      setErrorMessage(validation.error!);
+      toast({ title: "Arquivo inválido", description: validation.error!, variant: "destructive" });
       return;
     }
 

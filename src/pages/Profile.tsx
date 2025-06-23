@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ const Profile = () => {
   });
 
   // Update form when profile loads
-  useState(() => {
+  useEffect(() => {
     if (profile) {
       setFormData({
         name: profile.name || '',
