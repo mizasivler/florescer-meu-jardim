@@ -77,12 +77,19 @@ const Header = ({ profile }: HeaderProps) => {
       {/* Main Header with Avatar and Stats */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
-          {/* Avatar with Level Badge */}
+          {/* Avatar with Level Badge - Now shows actual user avatar */}
           <div className="relative">
             <Avatar className="w-16 h-16 border-3 border-white shadow-lg">
-              <AvatarImage src="/placeholder.svg" alt={profile?.name || 'Usuária'} />
+              <AvatarImage 
+                src={profile?.avatar_url || "/placeholder.svg"} 
+                alt={profile?.name || 'Usuária'}
+                onError={(e) => {
+                  // Fallback for broken images
+                  (e.target as HTMLImageElement).src = "/placeholder.svg";
+                }}
+              />
               <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xl font-bold">
-                {profile?.name?.charAt(0) || 'U'}
+                {profile?.name?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center border-2 border-white">

@@ -18,39 +18,97 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
   const fileInput = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
 
-  // Preview image before upload
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setErrorMessage(null);
-    const file = e.target.files?.[0];
-    if (file) {
-      // Checagem estendida de tipo e tamanho
-      if (!["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.type)) {
-        const msg = "A imagem deve ser JPG/PNG/WebP";
-        setErrorMessage(msg);
-        toast({ title: "Tipo de imagem inválido", description: msg, variant: "destructive" });
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) {
-        const msg = "A imagem deve ter no máximo 2MB";
-        setErrorMessage(msg);
-        toast({ title: "Imagem muito grande", description: msg, variant: "destructive" });
-        return;
-      }
-      setPreviewUrl(URL.createObjectURL(file));
-      handleUpload(file);
+  // Enhanced security: File validation with detailed checks
+  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+    // Check file type (whitelist approach)
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      return { isValid: false, error: "Apenas imagens PNG, JPG, JPEG ou WebP são permitidas" };
     }
+
+    // Check file size (2MB max)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      return { isValid: false, error: "A imagem deve ter no máximo 2MB" };
+    }
+
+    // Check minimum dimensions (prevent 1x1 pixel attacks)
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.width < 50 || img.height < 50) {
+          resolve({ isValid: false, error: "A imagem deve ter pelo menos 50x50 pixels" });
+        } else if (img.width > 2048 || img.height > 2048) {
+          resolve({ isValid: false, error: "A imagem deve ter no máximo 2048x2048 pixels" });
+        } else {
+          resolve({ isValid: true });
+        }
+      };
+      img.onerror = () => {
+        resolve({ isValid: false, error: "Arquivo de imagem inválido ou corrompido" });
+      };
+      img.src = URL.createObjectURL(file);
+    }) as Promise<{ isValid: boolean; error?: string }>;
   };
 
-  // Handle the upload and save public URL
+  // Preview image before upload with enhanced validation
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMessage(null);
+    const file = e.target.files?.[0];
+    
+    if (!file) return;
+
+    // Basic validation first
+    const basicValidation = validateFile(file);
+    if (!basicValidation.isValid) {
+      setErrorMessage(basicValidation.error!);
+      toast({ title: "Arquivo inválido", description: basicValidation.error!, variant: "destructive" });
+      return;
+    }
+
+    // Advanced validation (dimensions)
+    const advancedValidation = await validateFile(file);
+    if (!advancedValidation.isValid) {
+      setErrorMessage(advancedValidation.error!);
+      toast({ title: "Arquivo inválido", description: advancedValidation.error!, variant: "destructive" });
+      return;
+    }
+
+    // Create preview
+    setPreviewUrl(URL.createObjectURL(file));
+    handleUpload(file);
+  };
+
+  // Enhanced upload with better error handling and security
   async function handleUpload(file: File) {
     setUploading(true);
     setErrorMessage(null);
+    
     try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${userId}/${Date.now()}.${fileExt}`;
+      // Generate secure file path with user ID and timestamp
+      const fileExt = file.name.split(".").pop()?.toLowerCase();
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 8);
+      const filePath = `${userId}/${timestamp}_${randomString}.${fileExt}`;
+
+      // Delete old avatar if exists (cleanup)
+      if (currentAvatarUrl) {
+        try {
+          const oldFilePath = currentAvatarUrl.split('/').pop();
+          if (oldFilePath) {
+            await supabase.storage.from("avatars").remove([`${userId}/${oldFilePath}`]);
+          }
+        } catch (cleanupError) {
+          console.warn("Could not cleanup old avatar:", cleanupError);
+          // Continue with upload even if cleanup fails
+        }
+      }
+
+      // Upload with enhanced security options
       const { error } = await supabase.storage.from("avatars").upload(filePath, file, {
-        upsert: true,
-        cacheControl: "3600"
+        upsert: false, // Don't overwrite, use unique names instead
+        cacheControl: "3600",
+        contentType: file.type // Explicitly set content type
       });
 
       if (error) {
@@ -95,6 +153,10 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
           src={previewUrl || currentAvatarUrl || "/placeholder.svg"}
           alt="Avatar"
           className="object-cover w-full h-full"
+          onError={(e) => {
+            // Fallback for broken images
+            (e.target as HTMLImageElement).src = "/placeholder.svg";
+          }}
         />
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
           {uploading ? <Loader2 className="animate-spin text-white w-7 h-7" /> : <Camera className="text-white w-7 h-7" />}
@@ -102,7 +164,7 @@ export default function ProfileAvatarUpload({ userId, currentAvatarUrl, onUpload
       </div>
       <input
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/jpg,image/webp"
         ref={fileInput}
         className="hidden"
         disabled={uploading}
